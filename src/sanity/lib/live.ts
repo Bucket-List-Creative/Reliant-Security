@@ -4,11 +4,12 @@
 import { defineLive } from "next-sanity/live";
 import { client } from './client'
 import { sanityConfigured } from '../env'
+import { fallbackSanityData } from './fallback'
 
 const live = sanityConfigured ? defineLive({ client }) : null;
 
 export const sanityFetch =
-  live?.sanityFetch ?? (async () => ({ data: null }));
+  live?.sanityFetch ?? (async ({ query }: { query?: unknown }) => ({ data: fallbackSanityData(query) }));
 
 export const SanityLive = live?.SanityLive ?? function SanityLive() {
   return null;

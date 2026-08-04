@@ -1,15 +1,16 @@
 import { createClient } from 'next-sanity'
 
 import { apiVersion, dataset, projectId, sanityConfigured } from '../env'
+import { fallbackSanityData } from './fallback'
 
 type QueryClient = {
-  fetch: <T = unknown>() => Promise<T>
+  fetch: <T = unknown>(query?: unknown) => Promise<T>
   withConfig: () => QueryClient
 }
 
 const emptyClient: QueryClient = {
-  async fetch<T>() {
-    return null as T
+  async fetch<T>(query?: unknown) {
+    return fallbackSanityData(query) as T
   },
   withConfig() {
     return this
