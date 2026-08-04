@@ -22,6 +22,8 @@
 
 # misc
 .DS_Store
+# macOS AppleDouble files (created on exFAT/FAT external drives)
+._*
 *.pem
 
 # debug
@@ -35,6 +37,9 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# local assistant workspace
+.claude/
 
 # typescript
 *.tsbuildinfo

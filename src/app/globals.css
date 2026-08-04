@@ -1,26 +1,503 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ------------------------------------------------------------------
+   Reliant Security — Soft UI (neumorphism) design system
+   Ported from the brand handoff `tokens.css` into Tailwind v4 `@theme`.
+   Light source is top-left (315°): white highlight up-left, soft dark
+   shadow down-right. Raised = actionable, inset = passive.
+   ------------------------------------------------------------------ */
+
+@theme {
+  /* ---- Brand ---- */
+  --color-brand: #008c58;
+  --color-brand-hover: #00a869;
+  --color-brand-press: #00734a;
+  --color-ink: #232727;
+  --color-white: #fefefe;
+
+  /* ---- Surface (Soft UI base — never pure white) ---- */
+  --color-surface: #e6eae8;
+  --color-surface-raised: #eaeeec;
+
+  /* ---- Neutral ramp ---- */
+  --color-n-000: #fefefe;
+  --color-n-050: #f1f4f2;
+  --color-n-100: #e6eae8;
+  --color-n-200: #d3d9d6;
+  --color-n-300: #b4bcb8;
+  --color-n-500: #7a8480;
+  --color-n-700: #4a534f;
+  --color-n-800: #343a38;
+  --color-n-900: #232727;
+
+  /* ---- Semantic / state ---- */
+  --color-success: #12a265;
+  --color-warning: #e0a21a;
+  --color-danger: #d64545;
+  --color-emergency: #c4302b;
+  --color-info: #2e7cd6;
+  --color-disabled: #b4bcb8;
+
+  /* ---- Elevation (raised) ---- */
+  --shadow-soft-1: 3px 3px 6px #c5cdca, -3px -3px 6px #ffffff;
+  --shadow-soft-2: 5px 5px 10px #c5cdca, -5px -5px 10px #ffffff;
+  --shadow-soft-3: 8px 8px 16px #c5cdca, -8px -8px 16px #ffffff;
+  --shadow-soft-4: 12px 12px 24px #c2cac7, -12px -12px 24px #ffffff;
+  --shadow-soft-5: 18px 18px 36px #bfc8c4, -18px -18px 36px #ffffff;
+
+  /* ---- Elevation (inset / wells) ---- */
+  --shadow-soft-in: inset 6px 6px 12px #c9d1ce, inset -6px -6px 12px #ffffff;
+  --shadow-soft-in-sm: inset 3px 3px 6px #c9d1ce, inset -3px -3px 6px #ffffff;
+
+  /* ---- Radius ---- */
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
+  --radius-pill: 999px;
+
+  /* ---- Type ---- */
+  --font-display: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "SFMono-Regular", "SF Mono", ui-monospace, monospace;
+
+  /* ---- Motion ---- */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 150ms;
+  --dur-base: 280ms;
+  --dur-slow: 450ms;
+
+  /* ---- Layout ---- */
+  --container-site: 1200px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* ------------------------------------------------------------------
+   Base
+   ------------------------------------------------------------------ */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  /* Accessibility: single visible focus treatment on every focusable element.
+     Never rely on shadow alone to signal state — always a 2px green ring. */
+  :where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ------------------------------------------------------------------
+   sfc-* — Soft component layer
+   Buttons press inward on click; cards lift on hover; inputs are inset
+   wells whose focus deepens the inset and adds a green ring.
+   ------------------------------------------------------------------ */
+@layer components {
+  /* ---- Layout helpers ---- */
+  .sfc-container {
+    width: 100%;
+    max-width: var(--container-site);
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+
+  .sfc-section {
+    padding-block: clamp(3rem, 8vw, 6rem);
+  }
+
+  /* ---- Buttons ---- */
+  .sfc-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 44px; /* 44px touch target */
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.95rem;
+    line-height: 1;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: var(--color-surface);
+    color: var(--color-ink);
+    box-shadow: var(--shadow-soft-2);
+    transition: box-shadow var(--dur-fast) var(--ease-soft),
+      background-color var(--dur-fast) var(--ease-soft),
+      color var(--dur-fast) var(--ease-soft);
+  }
+  .sfc-btn:active,
+  .sfc-btn.is-pressed {
+    box-shadow: var(--shadow-soft-in);
+  }
+  .sfc-btn[disabled],
+  .sfc-btn[aria-disabled="true"] {
+    color: var(--color-disabled);
+    cursor: not-allowed;
+    box-shadow: var(--shadow-soft-in-sm);
+  }
+
+  .sfc-btn--primary {
+    background: var(--color-brand);
+    color: var(--color-white);
+    border-color: var(--color-brand-press);
+  }
+  .sfc-btn--primary:hover {
+    background: var(--color-brand-hover);
+  }
+
+  .sfc-btn--secondary {
+    background: var(--color-surface-raised);
+    color: var(--color-ink);
+  }
+
+  .sfc-btn--outline {
+    background: var(--color-surface);
+    color: var(--color-brand-press);
+    border-color: var(--color-brand);
+    box-shadow: var(--shadow-soft-1);
+  }
+
+  .sfc-btn--ghost {
+    background: transparent;
+    color: var(--color-ink);
+    box-shadow: none;
+  }
+  .sfc-btn--ghost:hover {
+    box-shadow: var(--shadow-soft-1);
+  }
+
+  .sfc-btn--emergency {
+    background: var(--color-emergency);
+    color: var(--color-white);
+    border-color: #9e2622;
+  }
+  .sfc-btn--emergency:hover {
+    background: #d6352f;
+  }
+
+  /* ---- Cards ---- */
+  .sfc-card {
+    background: var(--color-surface-raised);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    box-shadow: var(--shadow-soft-3);
+    transition: box-shadow var(--dur-base) var(--ease-soft);
+  }
+  .sfc-card--interactive:hover {
+    box-shadow: var(--shadow-soft-4);
+  }
+
+  .sfc-card__icon {
+    display: inline-grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-soft-in-sm);
+    color: var(--color-brand-press);
+    font-size: 1.5rem;
+  }
+
+  /* ---- Inset well (inputs, tracks) ---- */
+  .sfc-input,
+  .sfc-textarea,
+  .sfc-select {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    box-shadow: var(--shadow-soft-in-sm);
+    transition: box-shadow var(--dur-fast) var(--ease-soft),
+      border-color var(--dur-fast) var(--ease-soft);
+  }
+  .sfc-textarea {
+    min-height: 8rem;
+    resize: vertical;
+  }
+  .sfc-input::placeholder,
+  .sfc-textarea::placeholder {
+    color: var(--color-n-500);
+  }
+  .sfc-input:focus,
+  .sfc-textarea:focus,
+  .sfc-select:focus {
+    box-shadow: var(--shadow-soft-in);
+    /* focus-visible ring in base layer supplies the green outline */
+  }
+  .sfc-input[aria-invalid="true"],
+  .sfc-textarea[aria-invalid="true"] {
+    border-color: var(--color-danger);
+  }
+
+  .sfc-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--color-n-800);
+  }
+
+  /* ---- Badge ---- */
+  .sfc-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-soft-in-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-n-700);
+  }
+
+  /* ---- Accordion (native <details>) ---- */
+  .sfc-accordion {
+    background: var(--color-surface-raised);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-soft-2);
+    overflow: hidden;
+  }
+  .sfc-accordion + .sfc-accordion {
+    margin-top: 1rem;
+  }
+  .sfc-accordion__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+  }
+  .sfc-accordion__summary::-webkit-details-marker {
+    display: none;
+  }
+  .sfc-accordion__chevron {
+    transition: transform var(--dur-base) var(--ease-soft);
+    color: var(--color-brand-press);
+    flex: none;
+  }
+  .sfc-accordion[open] .sfc-accordion__chevron {
+    transform: rotate(180deg);
+  }
+  .sfc-accordion__body {
+    padding: 0 1.5rem 1.25rem;
+    color: var(--color-n-700);
+    line-height: 1.6;
+  }
+
+  /* ---- Tabs ---- */
+  .sfc-tabs__list {
+    display: inline-flex;
+    gap: 0.25rem;
+    padding: 0.375rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-soft-in-sm);
+  }
+  .sfc-tab {
+    min-height: 44px;
+    padding: 0.5rem 1.25rem;
+    border: none;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--color-n-700);
+    font-weight: 600;
+    cursor: pointer;
+    transition: box-shadow var(--dur-fast) var(--ease-soft),
+      color var(--dur-fast) var(--ease-soft);
+  }
+  .sfc-tab.is-active {
+    background: var(--color-surface-raised);
+    color: var(--color-ink);
+    box-shadow: var(--shadow-soft-2);
+  }
+
+  /* ---- Toggle ---- */
+  .sfc-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 56px;
+    height: 30px;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-soft-in-sm);
+    cursor: pointer;
+    border: none;
+    padding: 0;
+  }
+  .sfc-toggle__thumb {
+    position: absolute;
+    left: 3px;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-raised);
+    box-shadow: var(--shadow-soft-1);
+    transition: transform var(--dur-base) var(--ease-soft),
+      background-color var(--dur-base) var(--ease-soft);
+  }
+  .sfc-toggle[aria-checked="true"] {
+    box-shadow: var(--shadow-soft-in-sm), inset 0 0 0 2px var(--color-brand);
+  }
+  .sfc-toggle[aria-checked="true"] .sfc-toggle__thumb {
+    transform: translateX(26px);
+    background: var(--color-brand);
+  }
+
+  /* ---- Service-area map (Leaflet) ---- */
+  .leaflet-container {
+    font-family: var(--font-body);
+    background: var(--color-surface);
+  }
+  .reliant-pin {
+    background: transparent;
+    border: none;
+  }
+  /* Logo badge marker */
+  .reliant-logo-pin {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--color-n-000);
+    border: 3px solid var(--color-brand);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.28);
+    display: grid;
+    place-items: center;
+    transition: transform var(--dur-fast) var(--ease-soft);
+  }
+  .reliant-logo-pin::after {
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid var(--color-brand);
+  }
+  .reliant-logo-pin img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+  }
+  .reliant-logo-pin.is-active {
+    transform: scale(1.18);
+    z-index: 500;
+    border-color: var(--color-brand-press);
+  }
+  .reliant-logo-pin.is-active::after {
+    border-top-color: var(--color-brand-press);
+  }
+  .reliant-map-tooltip.leaflet-tooltip {
+    background: var(--color-brand-press);
+    color: var(--color-white);
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 0.25rem 0.65rem;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.78rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
+  }
+  .reliant-map-tooltip.leaflet-tooltip-top::before {
+    border-top-color: var(--color-brand-press);
+  }
+  /* Neumorphic zoom buttons */
+  .leaflet-touch .leaflet-bar,
+  .leaflet-bar {
+    border: none;
+    box-shadow: var(--shadow-soft-2);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  .leaflet-bar a {
+    background: var(--color-surface-raised);
+    color: var(--color-ink);
+    border-bottom-color: var(--color-n-200);
+  }
+  .leaflet-bar a:hover {
+    background: var(--color-surface);
+  }
+
+  /* ---- Portable Text prose ---- */
+  .sfc-prose {
+    color: var(--color-ink);
+    line-height: 1.7;
+  }
+  .sfc-prose > * + * {
+    margin-top: 1.15rem;
+  }
+  .sfc-prose h2 {
+    font-size: 1.75rem;
+    margin-top: 2.5rem;
+  }
+  .sfc-prose h3 {
+    font-size: 1.35rem;
+    margin-top: 2rem;
+  }
+  .sfc-prose a {
+    color: var(--color-brand-press);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .sfc-prose blockquote {
+    border-left: 3px solid var(--color-brand);
+    padding-left: 1.25rem;
+    color: var(--color-n-700);
+    font-style: italic;
+  }
+  .sfc-prose ul {
+    list-style: disc;
+    padding-left: 1.5rem;
+  }
+  .sfc-prose ol {
+    list-style: decimal;
+    padding-left: 1.5rem;
+  }
 }
