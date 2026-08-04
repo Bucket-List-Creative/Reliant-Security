@@ -3,7 +3,13 @@
 // https://github.com/sanity-io/next-sanity#live-content-api for more information.
 import { defineLive } from "next-sanity/live";
 import { client } from './client'
+import { sanityConfigured } from '../env'
 
-export const { sanityFetch, SanityLive } = defineLive({
-  client,
-});
+const live = sanityConfigured ? defineLive({ client }) : null;
+
+export const sanityFetch =
+  live?.sanityFetch ?? (async () => ({ data: null }));
+
+export const SanityLive = live?.SanityLive ?? function SanityLive() {
+  return null;
+};
