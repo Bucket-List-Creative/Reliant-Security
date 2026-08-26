@@ -38,23 +38,25 @@ export function StatBar({
   return (
     <section className="sfc-section pt-0" id="monitoring-network">
       <Container>
+        {/* Dark band: the page runs long on pale cards, and this is the first
+            thing after the hero — it needs to land. */}
         <div
-          className="rounded-[var(--radius-xl)] bg-surface-raised px-8 py-10"
-          style={{ boxShadow: "var(--shadow-soft-3)" }}
+          className="sfc-band px-6 py-10 sm:px-10 sm:py-12"
+          style={{ boxShadow: "var(--shadow-soft-4)" }}
         >
           {heading && (
-            <h2 className="mb-8 text-center font-display text-2xl font-bold sm:text-3xl">
+            <h2 className="mx-auto mb-10 max-w-2xl text-center font-display text-2xl font-bold sm:text-3xl">
               {heading}
             </h2>
           )}
 
-          <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-9 md:grid-cols-4">
             {items.map((stat) => (
               <div key={stat._id} className="text-center">
-                <div className="font-display text-4xl font-bold text-brand-press sm:text-5xl">
+                <div className="font-display text-[2.15rem] font-bold leading-none tracking-tight text-white sm:text-5xl">
                   {stat.value}
                 </div>
-                <div className="mt-2 text-sm font-medium text-n-700">
+                <div className="mx-auto mt-2.5 max-w-[16ch] text-xs font-medium leading-snug text-white/70 sm:text-sm">
                   {stat.label}
                 </div>
               </div>
@@ -62,7 +64,7 @@ export function StatBar({
           </div>
 
           {caption && (
-            <p className="mx-auto mt-8 max-w-3xl text-center text-sm text-n-500">
+            <p className="mx-auto mt-10 max-w-3xl border-t border-white/15 pt-6 text-center text-xs leading-relaxed text-white/60 sm:text-sm">
               {caption}
             </p>
           )}

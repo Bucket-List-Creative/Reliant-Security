@@ -2,8 +2,13 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
-import { IconChevronDown, IconMenu2, IconX } from "@tabler/icons-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  IconChevronDown,
+  IconMenu2,
+  IconX,
+  IconArrowRight,
+} from "@tabler/icons-react";
 import { Button } from "@/components/ui/Button";
 import { ServiceIcon, type ServiceIconKey } from "@/components/ui/ServiceIcon";
 import { SERVICE_CATEGORIES } from "@/content/services";
@@ -11,8 +16,7 @@ import { SERVICE_CATEGORIES } from "@/content/services";
 /**
  * Dropdown entries use the shared line-icon set (Tabler, MIT-licensed) rather
  * than emoji. Emoji render differently on every OS, don't inherit `currentColor`
- * so they can't be tinted to the navbar's white-on-green, and sit visually
- * heavier than the Services mega-menu icons alongside them.
+ * so they can't be tinted, and sit visually heavier than the icons beside them.
  */
 type NavLeaf = {
   label: string;
@@ -75,6 +79,10 @@ const NAV: NavItem[] = [
   { label: "Contact", href: "/contact" },
 ];
 
+/** Grace period before a hover-opened menu closes, so a diagonal mouse path
+ *  from the trigger to the panel doesn't dismiss it mid-move. */
+const CLOSE_DELAY_MS = 180;
+
 function Chevron({ className = "" }: { className?: string }) {
   return (
     <IconChevronDown className={className} size={14} stroke={2.5} aria-hidden />
@@ -91,17 +99,86 @@ export function Navbar({
   const [active, setActive] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const navRef = useRef<HTMLElement>(null);
 
-  const activeItem = NAV.find(
-    (i) => i.label === active && (i.children || i.columns),
+  const cancelClose = useCallback(() => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  }, []);
+
+  const openMenu = useCallback(
+    (label: string | null) => {
+      cancelClose();
+      setActive(label);
+    },
+    [cancelClose],
   );
 
+  const scheduleClose = useCallback(() => {
+    cancelClose();
+    closeTimer.current = setTimeout(() => setActive(null), CLOSE_DELAY_MS);
+  }, [cancelClose]);
+
+  useEffect(() => cancelClose, [cancelClose]);
+
+  // Escape closes any open menu and returns focus behaviour to the page.
+  useEffect(() => {
+    if (!active && !open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setActive(null);
+        setOpen(false);
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [active, open]);
+
+  // Clicking or tabbing outside the nav dismisses the panel.
+  useEffect(() => {
+    if (!active) return;
+    function onOutside(e: Event) {
+      if (!navRef.current?.contains(e.target as Node)) setActive(null);
+    }
+    document.addEventListener("pointerdown", onOutside);
+    document.addEventListener("focusin", onOutside);
+    return () => {
+      document.removeEventListener("pointerdown", onOutside);
+      document.removeEventListener("focusin", onOutside);
+    };
+  }, [active]);
+
+  // Lock body scroll while the mobile sheet is open.
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
+  const ctaHref = emergencyPhone ? `tel:${emergencyPhone}` : "/contact";
+  const ctaLabel = emergencyPhone ? `Call ${emergencyPhone}` : "Get a Free Quote";
+
   return (
-    <header className="sticky top-0 z-50">
-      <div className="sfc-container pt-4" onMouseLeave={() => setActive(null)}>
-        {/* Floating green pill */}
+    <header
+      ref={navRef}
+      className="sticky top-0"
+      style={{ zIndex: "var(--z-navbar)" }}
+    >
+      <div className="sfc-container pt-4">
+        {/*
+          The pill deliberately has NO `overflow: hidden`. The dropdowns are
+          absolutely positioned panels anchored to their trigger, so they need
+          to escape the pill's bounds — and because they're no longer inside
+          it, they can carry their own max-height and scroll.
+        */}
         <div
-          className="overflow-hidden rounded-[var(--radius-xl)] bg-brand-press"
+          className="relative rounded-[var(--radius-xl)] bg-brand-press"
           style={{ boxShadow: "0 12px 30px rgba(0,0,0,0.18)" }}
         >
           <div className="flex items-center justify-between gap-4 px-5 py-3">
@@ -110,7 +187,7 @@ export function Navbar({
               href="/"
               className="flex items-center gap-2.5"
               aria-label={siteTitle}
-              onMouseEnter={() => setActive(null)}
+              onMouseEnter={scheduleClose}
             >
               <Image
                 src="/Images/Logo/logo-icon-white.png"
@@ -126,28 +203,37 @@ export function Navbar({
             </Link>
 
             {/* Desktop links */}
-            <ul className="hidden items-center gap-1 md:flex">
+            <ul className="hidden items-center gap-1 lg:flex">
               {NAV.map((item) => {
                 const hasMenu = Boolean(item.children || item.columns);
                 const isOpen = active === item.label;
                 const base =
                   "inline-flex items-center gap-1 rounded-[var(--radius-pill)] px-3.5 py-2 text-[0.95rem] font-medium transition-colors";
+
                 if (!hasMenu) {
                   return (
                     <li key={item.label}>
                       <Link
                         href={item.href}
                         className={`${base} text-white/90 hover:bg-white/10 hover:text-white`}
-                        onMouseEnter={() => setActive(null)}
-                        onFocus={() => setActive(null)}
+                        onMouseEnter={scheduleClose}
+                        onFocus={() => openMenu(null)}
                       >
                         {item.label}
                       </Link>
                     </li>
                   );
                 }
+
+                const panelId = `nav-panel-${item.label.toLowerCase()}`;
+
                 return (
-                  <li key={item.label}>
+                  <li
+                    key={item.label}
+                    className="relative"
+                    onMouseEnter={() => openMenu(item.label)}
+                    onMouseLeave={scheduleClose}
+                  >
                     <Link
                       href={item.href}
                       className={`${base} ${
@@ -156,9 +242,16 @@ export function Navbar({
                           : "text-white/90 hover:bg-white/10 hover:text-white"
                       }`}
                       aria-expanded={isOpen}
-                      onMouseEnter={() => setActive(item.label)}
-                      onFocus={() => setActive(item.label)}
-                      onClick={() => setActive(isOpen ? null : item.label)}
+                      aria-controls={panelId}
+                      onFocus={() => openMenu(item.label)}
+                      onClick={(e) => {
+                        // First click reveals the menu; the label itself is
+                        // still reachable via its own "View all" link inside.
+                        if (!isOpen) {
+                          e.preventDefault();
+                          openMenu(item.label);
+                        }
+                      }}
                     >
                       {item.label}
                       <Chevron
@@ -167,25 +260,38 @@ export function Navbar({
                         }`}
                       />
                     </Link>
+
+                    {/* Compact panels anchor to their own trigger. The wide
+                        Services mega-menu is rendered at pill level instead —
+                        centring an 896px panel on a nav item pushes it off the
+                        side of the viewport. */}
+                    {item.children && (
+                      <DropdownPanel
+                        id={panelId}
+                        item={item}
+                        isOpen={isOpen}
+                        onNavigate={() => setActive(null)}
+                      />
+                    )}
                   </li>
                 );
               })}
             </ul>
 
-            <div className="hidden md:block">
+            <div className="hidden lg:block">
               <Button
-                href={emergencyPhone ? `tel:${emergencyPhone}` : "/contact"}
+                href={ctaHref}
                 variant="cta"
-                onMouseEnter={() => setActive(null)}
+                onMouseEnter={scheduleClose}
               >
-                {emergencyPhone ? `Call ${emergencyPhone}` : "Get a Free Quote"}
+                {ctaLabel}
               </Button>
             </div>
 
             {/* Mobile toggle */}
             <button
               type="button"
-              className="grid size-11 place-items-center rounded-[var(--radius-sm)] text-white transition-colors hover:bg-white/10 md:hidden"
+              className="grid size-11 place-items-center rounded-[var(--radius-sm)] text-white transition-colors hover:bg-white/10 lg:hidden"
               aria-expanded={open}
               aria-controls="mobile-menu"
               aria-label={open ? "Close menu" : "Open menu"}
@@ -199,118 +305,40 @@ export function Navbar({
             </button>
           </div>
 
-          {/* Desktop expanding mega-menu — the pill grows to reveal it */}
-          <div
-            className="hidden grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out md:grid"
-            style={{ gridTemplateRows: activeItem ? "1fr" : "0fr" }}
-          >
-            <div className="min-h-0">
-              <div className="border-t border-white/15 px-5">
-                <div
-                  className={`py-6 transition-opacity duration-300 ${
-                    activeItem ? "opacity-100" : "opacity-0"
-                  }`}
-                >
-                  {activeItem?.columns ? (
-                    <div
-                      className="grid gap-x-8 gap-y-7"
-                      style={{
-                        gridTemplateColumns:
-                          "repeat(auto-fit, minmax(190px, 1fr))",
-                      }}
-                    >
-                      {activeItem.columns.map((col) => (
-                        <div key={col.title}>
-                          <Link
-                            href={col.href}
-                            className="mb-3 flex items-center gap-2.5 text-white"
-                          >
-                            <span
-                              aria-hidden
-                              className="grid size-8 flex-none place-items-center rounded-[var(--radius-sm)] bg-white/15"
-                            >
-                              <ServiceIcon name={col.iconKey} size={18} />
-                            </span>
-                            <span className="font-semibold tracking-tight">
-                              {col.title}
-                            </span>
-                          </Link>
-                          <ul className="space-y-0.5">
-                            {col.items.map((it) => (
-                              <li key={it.label}>
-                                <Link
-                                  href={it.href}
-                                  className="block rounded-[var(--radius-sm)] px-2.5 py-1.5 transition-colors hover:bg-white/10"
-                                >
-                                  <span className="block text-sm font-medium text-white">
-                                    {it.label}
-                                  </span>
-                                  {it.desc && (
-                                    <span className="block text-xs text-white/60">
-                                      {it.desc}
-                                    </span>
-                                  )}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex flex-wrap gap-3">
-                      {activeItem?.children?.map((c) => (
-                        <Link
-                          key={c.label}
-                          href={c.href}
-                          className="flex min-w-[220px] flex-1 items-start gap-3 rounded-[var(--radius-md)] bg-white/10 p-4 transition-colors hover:bg-white/20"
-                        >
-                          {c.iconKey && (
-                            <span
-                              aria-hidden
-                              className="grid size-10 flex-none place-items-center rounded-[var(--radius-sm)] bg-white/15 text-white"
-                            >
-                              <ServiceIcon name={c.iconKey} size={20} />
-                            </span>
-                          )}
-                          <span>
-                            <span className="block font-semibold text-white">
-                              {c.label}
-                            </span>
-                            {c.desc && (
-                              <span className="mt-0.5 block text-sm text-white/70">
-                                {c.desc}
-                              </span>
-                            )}
-                          </span>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* Wide mega-menus span the pill, so they stay inside the viewport
+              at every desktop width regardless of where their trigger sits. */}
+          {NAV.filter((i) => i.columns).map((item) => (
+            <DropdownPanel
+              key={item.label}
+              id={`nav-panel-${item.label.toLowerCase()}`}
+              item={item}
+              isOpen={active === item.label}
+              onNavigate={() => setActive(null)}
+              onMouseEnter={() => openMenu(item.label)}
+              onMouseLeave={scheduleClose}
+            />
+          ))}
         </div>
 
-        {/* Mobile menu */}
+        {/* Mobile sheet — capped and scrollable so long menus never trap the user */}
         {open && (
           <div
             id="mobile-menu"
-            className="mt-2 rounded-[var(--radius-lg)] bg-surface-raised p-3 md:hidden"
+            className="mt-2 max-h-[calc(100dvh-7rem)] overflow-y-auto overscroll-contain rounded-[var(--radius-lg)] bg-surface-raised p-3 lg:hidden"
             style={{ boxShadow: "var(--shadow-soft-3)" }}
           >
             <ul className="flex flex-col gap-1">
               {NAV.map((item) => {
                 const hasMenu = Boolean(item.children || item.columns);
+                const sectionOpen = openSection === item.label;
                 return (
                   <li key={item.label}>
                     {hasMenu ? (
                       <>
                         <button
                           type="button"
-                          className="flex w-full items-center justify-between rounded-[var(--radius-sm)] px-4 py-3 text-left font-medium text-ink"
-                          aria-expanded={openSection === item.label}
+                          className="flex w-full items-center justify-between rounded-[var(--radius-sm)] px-4 py-3 text-left font-semibold text-ink"
+                          aria-expanded={sectionOpen}
                           onClick={() =>
                             setOpenSection((s) =>
                               s === item.label ? null : item.label,
@@ -320,13 +348,14 @@ export function Navbar({
                           {item.label}
                           <Chevron
                             className={`text-brand-press transition-transform ${
-                              openSection === item.label ? "rotate-180" : ""
+                              sectionOpen ? "rotate-180" : ""
                             }`}
                           />
                         </button>
-                        {openSection === item.label &&
+
+                        {sectionOpen &&
                           (item.columns ? (
-                            <div className="mb-1 ml-2 border-l-2 border-n-200 pl-3">
+                            <div className="mb-2 ml-2 border-l-2 border-n-200 pl-3">
                               {item.columns.map((col) => (
                                 <div key={col.title} className="py-1">
                                   <Link
@@ -335,10 +364,7 @@ export function Navbar({
                                     onClick={() => setOpen(false)}
                                   >
                                     <span className="text-brand-press">
-                                      <ServiceIcon
-                                        name={col.iconKey}
-                                        size={16}
-                                      />
+                                      <ServiceIcon name={col.iconKey} size={16} />
                                     </span>
                                     {col.title}
                                   </Link>
@@ -359,7 +385,7 @@ export function Navbar({
                               ))}
                             </div>
                           ) : (
-                            <ul className="mb-1 ml-4 border-l-2 border-n-200 pl-2">
+                            <ul className="mb-2 ml-4 border-l-2 border-n-200 pl-2">
                               {item.children?.map((c) => (
                                 <li key={c.label}>
                                   <Link
@@ -372,10 +398,7 @@ export function Navbar({
                                         aria-hidden
                                         className="flex-none text-brand-press"
                                       >
-                                        <ServiceIcon
-                                          name={c.iconKey}
-                                          size={18}
-                                        />
+                                        <ServiceIcon name={c.iconKey} size={18} />
                                       </span>
                                     )}
                                     {c.label}
@@ -388,7 +411,7 @@ export function Navbar({
                     ) : (
                       <Link
                         href={item.href}
-                        className="block rounded-[var(--radius-sm)] px-4 py-3 font-medium text-ink"
+                        className="block rounded-[var(--radius-sm)] px-4 py-3 font-semibold text-ink"
                         onClick={() => setOpen(false)}
                       >
                         {item.label}
@@ -398,12 +421,8 @@ export function Navbar({
                 );
               })}
               <li className="mt-2">
-                <Button
-                  href={emergencyPhone ? `tel:${emergencyPhone}` : "/contact"}
-                  variant="cta"
-                  className="w-full"
-                >
-                  {emergencyPhone ? `Call ${emergencyPhone}` : "Get a Free Quote"}
+                <Button href={ctaHref} variant="cta" className="w-full">
+                  {ctaLabel}
                 </Button>
               </li>
             </ul>
@@ -411,5 +430,145 @@ export function Navbar({
         )}
       </div>
     </header>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Dropdown panel                                                     */
+/* ------------------------------------------------------------------ */
+
+/**
+ * A floating panel anchored under its trigger.
+ *
+ * Two widths: the Services mega-menu is wide and column-based, while the
+ * simple link groups get a compact single column anchored to their own item
+ * rather than spanning the whole bar. Both cap their height and scroll
+ * internally — the previous version grew the navbar pill itself, which had
+ * `overflow: hidden`, so a long list simply ran off-screen with no way to
+ * reach the rest.
+ */
+function DropdownPanel({
+  id,
+  item,
+  isOpen,
+  onNavigate,
+  onMouseEnter,
+  onMouseLeave,
+}: {
+  id: string;
+  item: NavItem;
+  isOpen: boolean;
+  onNavigate: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+}) {
+  const wide = Boolean(item.columns);
+
+  return (
+    <div
+      id={id}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      className={[
+        "absolute top-full pt-3 transition-all duration-200",
+        // Wide panels span their positioned parent (the pill). Compact ones
+        // centre on their trigger, which is safe at 22rem.
+        wide
+          ? "inset-x-0"
+          : "left-1/2 w-[min(22rem,calc(100vw-3rem))] -translate-x-1/2",
+        isOpen
+          ? "visible translate-y-0 opacity-100"
+          : "invisible -translate-y-1 opacity-0",
+      ].join(" ")}
+      // `inert` keeps the closed panel out of the tab order and the
+      // accessibility tree without needing to unmount it.
+      inert={!isOpen}
+    >
+      <div
+        className="max-h-[min(70vh,32rem)] overflow-y-auto overscroll-contain rounded-[var(--radius-lg)] bg-surface-raised p-4"
+        style={{ boxShadow: "var(--shadow-soft-4)" }}
+      >
+        {item.columns ? (
+          <>
+            <div className="grid gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+              {item.columns.map((col) => (
+                <div key={col.title}>
+                  <Link
+                    href={col.href}
+                    onClick={onNavigate}
+                    className="mb-1.5 flex items-center gap-2 rounded-[var(--radius-sm)] px-2 py-1.5 text-ink transition-colors hover:bg-surface"
+                  >
+                    <span
+                      aria-hidden
+                      className="grid size-7 flex-none place-items-center rounded-[var(--radius-xs)] bg-brand/10 text-brand-press"
+                    >
+                      <ServiceIcon name={col.iconKey} size={16} />
+                    </span>
+                    <span className="text-sm font-bold tracking-tight">
+                      {col.title}
+                    </span>
+                  </Link>
+                  <ul>
+                    {col.items.map((it) => (
+                      <li key={it.label}>
+                        <Link
+                          href={it.href}
+                          onClick={onNavigate}
+                          className="block rounded-[var(--radius-sm)] px-2.5 py-1.5 text-sm text-n-700 transition-colors hover:bg-surface hover:text-ink"
+                        >
+                          {it.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-3 border-t border-n-200 pt-3">
+              <Link
+                href={item.href}
+                onClick={onNavigate}
+                className="inline-flex items-center gap-1.5 rounded-[var(--radius-sm)] px-2 py-1.5 text-sm font-semibold text-brand-press transition-colors hover:bg-surface"
+              >
+                View all {item.label.toLowerCase()}
+                <IconArrowRight size={15} stroke={2.2} aria-hidden />
+              </Link>
+            </div>
+          </>
+        ) : (
+          <ul className="flex flex-col gap-0.5">
+            {item.children?.map((c) => (
+              <li key={c.label}>
+                <Link
+                  href={c.href}
+                  onClick={onNavigate}
+                  className="flex items-start gap-3 rounded-[var(--radius-sm)] p-2.5 transition-colors hover:bg-surface"
+                >
+                  {c.iconKey && (
+                    <span
+                      aria-hidden
+                      className="grid size-9 flex-none place-items-center rounded-[var(--radius-sm)] bg-brand/10 text-brand-press"
+                    >
+                      <ServiceIcon name={c.iconKey} size={18} />
+                    </span>
+                  )}
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold text-ink">
+                      {c.label}
+                    </span>
+                    {c.desc && (
+                      <span className="mt-0.5 block text-xs leading-snug text-n-500">
+                        {c.desc}
+                      </span>
+                    )}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
   );
 }

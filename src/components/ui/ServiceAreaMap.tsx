@@ -324,7 +324,11 @@ export function ServiceAreaMap({
       >
         {showSidebar && (
           <aside
-            className="order-2 flex flex-col overflow-hidden rounded-[var(--radius-lg)] bg-surface-raised lg:order-1"
+            /* The `height` prop sizes the map; on mobile the sidebar stacks
+               above it, so capping it keeps the pair from running to ~1000px
+               of scroll before any page content follows. max-height wins over
+               the inline height below the lg breakpoint. */
+            className="order-2 flex max-h-80 flex-col overflow-hidden rounded-[var(--radius-lg)] bg-surface-raised lg:order-1 lg:max-h-none"
             style={{ boxShadow: "var(--shadow-soft-3)", height }}
           >
             <div className="flex items-center justify-between gap-3 bg-brand-press px-5 py-4 text-white">
@@ -385,7 +389,7 @@ export function ServiceAreaMap({
         )}
 
         <div
-          className="relative order-1 overflow-hidden rounded-[var(--radius-lg)] bg-surface-raised lg:order-2"
+          className="sfc-map order-1 overflow-hidden rounded-[var(--radius-lg)] bg-surface-raised lg:order-2"
           style={{ boxShadow: "var(--shadow-soft-3)" }}
         >
           <div

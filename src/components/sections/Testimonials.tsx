@@ -45,6 +45,9 @@ const FALLBACK: Testimonial[] = [
   },
 ];
 
+/** Rotated across the testimonial cards so the row isn't monochrome. */
+const ACCENTS = ["sfc-accent-green", "sfc-accent-blue", "sfc-accent-amber"];
+
 function Stars({ rating = 5 }: { rating?: number }) {
   return (
     <div
@@ -78,11 +81,22 @@ export function Testimonials({
         <h2 className="mb-12 max-w-2xl text-3xl font-bold sm:text-4xl">
           {heading}
         </h2>
-        <div className="grid gap-6 md:grid-cols-3">
-          {items.map((t) => (
-            <Card key={t._id} className="flex h-full flex-col">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((t, i) => (
+            <Card
+              key={t._id}
+              className={`sfc-card--accent ${ACCENTS[i % ACCENTS.length]} relative flex h-full flex-col`}
+            >
+              {/* Oversized quote mark, tinted to the card's accent. */}
+              <span
+                aria-hidden
+                className="pointer-events-none absolute right-5 top-2 select-none font-display text-[5rem] leading-none opacity-20"
+                style={{ color: "var(--accent)" }}
+              >
+                &rdquo;
+              </span>
               <Stars rating={t.rating ?? 5} />
-              <blockquote className="flex-1 text-lg leading-relaxed">
+              <blockquote className="relative flex-1 text-lg leading-relaxed">
                 “{t.quote}”
               </blockquote>
               <div className="mt-6 flex items-center gap-3">

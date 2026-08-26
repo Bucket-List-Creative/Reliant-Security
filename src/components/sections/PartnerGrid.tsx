@@ -41,7 +41,7 @@ function Tile({ partner }: { partner: Partner }) {
   );
 
   const cls =
-    "flex h-24 items-center justify-center rounded-[var(--radius-md)] bg-surface-raised px-6 text-center transition-shadow";
+    "flex h-24 items-center justify-center rounded-[var(--radius-md)] bg-surface-raised px-6 text-center transition-all hover:-translate-y-0.5 hover:text-brand-press";
 
   return partner.url ? (
     <a

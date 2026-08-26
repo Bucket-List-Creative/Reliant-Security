@@ -30,6 +30,30 @@
   --color-n-800: #343a38;
   --color-n-900: #232727;
 
+  /* ---- Accents ----
+     A categorical palette for cards, icon tiles, and section bands. The soft
+     UI base is a single pale grey-green, which left every card on the site
+     looking identical; these give sections a way to differentiate without
+     abandoning the neumorphic language.
+
+     Hues are spaced far enough apart to read as distinct at icon size, but all
+     sit at a similar mid-dark value so no single one shouts. Use the `-soft`
+     tints for fills and the base colour for the glyph or rule on top of it —
+     each pairing clears 4.5:1 against the tinted background. */
+  --color-accent-green: #008c58;
+  --color-accent-blue: #1d6fd0;
+  --color-accent-teal: #0e8f8f;
+  --color-accent-amber: #a8700a;
+  --color-accent-violet: #6d55d4;
+  --color-accent-rose: #c2456a;
+
+  --color-accent-green-soft: #d6ebe2;
+  --color-accent-blue-soft: #dbe7f8;
+  --color-accent-teal-soft: #d6eded;
+  --color-accent-amber-soft: #f4e8d2;
+  --color-accent-violet-soft: #e4dff8;
+  --color-accent-rose-soft: #f7dfe6;
+
   /* ---- Semantic / state ---- */
   --color-success: #12a265;
   --color-warning: #e0a21a;
@@ -69,6 +93,20 @@
 
   /* ---- Layout ---- */
   --container-site: 1200px;
+
+  /* ---- Stacking order ----
+     One scale for the whole site, so overlays can't fight each other.
+
+     Leaflet ships its own z-indexes internally (panes up to 1000, controls at
+     800). Those used to paint straight over the sticky navbar, because the
+     navbar sat at 50. Rather than escalating into a z-index war, `.sfc-map`
+     below opens its own stacking context — Leaflet's 1000 is then scoped
+     inside the map and can never escape it. The navbar value stays modest on
+     purpose; anything that needs to sit above it should use a token here. */
+  --z-map: 0;
+  --z-sticky: 100;
+  --z-navbar: 200;
+  --z-overlay: 300;
 }
 
 /* ------------------------------------------------------------------
@@ -134,6 +172,15 @@
 
   .sfc-section {
     padding-block: clamp(3rem, 8vw, 6rem);
+  }
+
+  /* Wrapper around any Leaflet map. `isolation: isolate` opens a stacking
+     context, trapping Leaflet's internal z-indexes (up to 1000) inside it so
+     the map can never paint over the sticky navbar. */
+  .sfc-map {
+    position: relative;
+    isolation: isolate;
+    z-index: var(--z-map);
   }
 
   /* ---- Buttons ---- */
@@ -248,6 +295,82 @@
     font-size: 1.5rem;
   }
 
+  /* ---- Accent cards ----
+     Set `--accent` / `--accent-soft` on the card (see `.sfc-accent-*` below)
+     and the icon tile, top rule, and hover glow all follow from it. */
+  .sfc-card--accent {
+    position: relative;
+    overflow: hidden;
+  }
+  .sfc-card--accent::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 4px;
+    background: var(--accent, var(--color-brand));
+    opacity: 0.85;
+  }
+  .sfc-card--accent .sfc-card__icon {
+    background: var(--accent-soft, var(--color-surface));
+    color: var(--accent, var(--color-brand-press));
+    box-shadow: none;
+  }
+  .sfc-card--interactive.sfc-card--accent:hover {
+    box-shadow: var(--shadow-soft-4);
+  }
+
+  .sfc-accent-green {
+    --accent: var(--color-accent-green);
+    --accent-soft: var(--color-accent-green-soft);
+  }
+  .sfc-accent-blue {
+    --accent: var(--color-accent-blue);
+    --accent-soft: var(--color-accent-blue-soft);
+  }
+  .sfc-accent-teal {
+    --accent: var(--color-accent-teal);
+    --accent-soft: var(--color-accent-teal-soft);
+  }
+  .sfc-accent-amber {
+    --accent: var(--color-accent-amber);
+    --accent-soft: var(--color-accent-amber-soft);
+  }
+  .sfc-accent-violet {
+    --accent: var(--color-accent-violet);
+    --accent-soft: var(--color-accent-violet-soft);
+  }
+  .sfc-accent-rose {
+    --accent: var(--color-accent-rose);
+    --accent-soft: var(--color-accent-rose-soft);
+  }
+
+  /* ---- Dark band ----
+     A full-width deep-green band. Used sparingly to break the page's long run
+     of pale cards — the stat bar and the closing CTA. */
+  .sfc-band {
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(
+        ellipse 80% 120% at 15% 0%,
+        rgb(255 255 255 / 0.10),
+        transparent 60%
+      ),
+      linear-gradient(
+        135deg,
+        var(--color-brand-press) 0%,
+        #005c3c 55%,
+        #00432c 100%
+      );
+    color: var(--color-white);
+    border-radius: var(--radius-xl);
+  }
+  .sfc-band h2,
+  .sfc-band h3 {
+    color: var(--color-white);
+  }
+
   /* ---- Inset well (inputs, tracks) ---- */
   .sfc-input,
   .sfc-textarea,
@@ -316,6 +439,21 @@
   .sfc-accordion + .sfc-accordion {
     margin-top: 1rem;
   }
+  /* A brand rule down the leading edge, filling in once the panel is open —
+     gives the FAQ stack some structure instead of a run of identical slabs. */
+  .sfc-accordion {
+    border-left: 3px solid transparent;
+    transition:
+      border-color var(--dur-base) var(--ease-soft),
+      box-shadow var(--dur-base) var(--ease-soft);
+  }
+  .sfc-accordion:hover {
+    border-left-color: var(--color-n-300);
+  }
+  .sfc-accordion[open] {
+    border-left-color: var(--color-brand);
+    box-shadow: var(--shadow-soft-3);
+  }
   .sfc-accordion__summary {
     display: flex;
     align-items: center;
@@ -326,6 +464,9 @@
     font-weight: 600;
     cursor: pointer;
     list-style: none;
+  }
+  .sfc-accordion[open] .sfc-accordion__summary {
+    color: var(--color-brand-press);
   }
   .sfc-accordion__summary::-webkit-details-marker {
     display: none;

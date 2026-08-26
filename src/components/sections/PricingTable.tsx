@@ -107,7 +107,7 @@ export function PricingTable({ plans }: { plans?: Plan[] }) {
         </span>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3">
         {items.map((plan) => {
           const { amount, per } = priceLabel(plan, annual);
           const featured = plan.featured === "featured";

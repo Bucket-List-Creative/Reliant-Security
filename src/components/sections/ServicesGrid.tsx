@@ -38,6 +38,16 @@ const FALLBACK: Pick<
   },
 ];
 
+/** Rotated across the grid so a row of service cards isn't monochrome. */
+const ACCENTS = [
+  "sfc-accent-green",
+  "sfc-accent-teal",
+  "sfc-accent-violet",
+  "sfc-accent-blue",
+  "sfc-accent-amber",
+  "sfc-accent-rose",
+];
+
 export function ServicesGrid({
   services,
   heading = "What we protect",
@@ -59,8 +69,8 @@ export function ServicesGrid({
           <p className="mt-4 text-lg text-n-700">{subheading}</p>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {items.map((service) => {
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {items.map((service, i) => {
             const inner = (
               <>
                 <CardIcon>
@@ -71,11 +81,14 @@ export function ServicesGrid({
                   )}
                 </CardIcon>
                 <h3 className="mt-5 text-xl font-semibold">{service.title}</h3>
-                <p className="mt-2 text-n-700">{service.summary}</p>
+                <p className="mt-2 text-[0.95rem] leading-relaxed text-n-700">
+                  {service.summary}
+                </p>
               </>
             );
 
             const slug = "slug" in service ? service.slug : undefined;
+            const cardClass = `sfc-card--accent ${ACCENTS[i % ACCENTS.length]} h-full`;
 
             return showLinks && slug ? (
               <Link
@@ -83,12 +96,12 @@ export function ServicesGrid({
                 href={`/services/${slug}`}
                 className="block"
               >
-                <Card interactive className="h-full">
+                <Card interactive className={cardClass}>
                   {inner}
                 </Card>
               </Link>
             ) : (
-              <Card key={service._id} interactive className="h-full">
+              <Card key={service._id} interactive className={cardClass}>
                 {inner}
               </Card>
             );
