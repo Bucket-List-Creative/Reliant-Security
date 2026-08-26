@@ -392,6 +392,104 @@
     }
   }
 
+  /* ---- Horizontal card rail ----
+     A native scroll-snap rail, not a scroll-jacked carousel. Vertical page
+     scroll is never hijacked: the rail is an ordinary horizontal scroll
+     container, so trackpad swipe, touch drag, shift+wheel, keyboard arrows,
+     and screen-reader navigation all behave the way the platform already
+     does. The arrow buttons are an affordance on top of that, not the only
+     way through.
+
+     Cards reveal with a scroll-DRIVEN animation (`animation-timeline`), so
+     progress is tied to scroll position rather than to a timer — nothing
+     animates while the rail is still. The whole effect is gated behind
+     @supports: browsers without scroll-driven animation get static cards
+     rather than cards stuck at opacity 0, which is how this fails badly if
+     the initial hidden state is applied unconditionally. */
+  .sfc-rail {
+    display: flex;
+    gap: 1.25rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    overscroll-behavior-x: contain;
+    /* Room for the cards' hover lift and shadow, which would otherwise be
+       clipped by the scroll container. */
+    padding-block: 0.75rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-n-300) transparent;
+  }
+  .sfc-rail::-webkit-scrollbar {
+    height: 6px;
+  }
+  .sfc-rail::-webkit-scrollbar-thumb {
+    background: var(--color-n-300);
+    border-radius: var(--radius-pill);
+  }
+  .sfc-rail::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sfc-rail__item {
+    flex: 0 0 clamp(15rem, 78vw, 17.5rem);
+    scroll-snap-align: start;
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .sfc-rail__item {
+        animation: sfc-rail-reveal linear both;
+        animation-timeline: view(inline);
+        /* Reveal as the card enters, settle before it's fully in view, and
+           recede symmetrically on the way out — that recession is what gives
+           the rail its sense of depth. */
+        animation-range: entry 5% entry 60%, exit 40% exit 95%;
+      }
+    }
+  }
+
+  @keyframes sfc-rail-reveal {
+    from {
+      opacity: 0.2;
+      transform: translateY(1rem) scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Edge masks: signal that content continues past both ends. */
+  .sfc-rail-mask {
+    position: relative;
+  }
+  .sfc-rail-mask::before,
+  .sfc-rail-mask::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0.6rem;
+    width: 2.5rem;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .sfc-rail-mask::before {
+    left: 0;
+    background: linear-gradient(
+      to right,
+      var(--color-surface),
+      transparent
+    );
+  }
+  .sfc-rail-mask::after {
+    right: 0;
+    background: linear-gradient(
+      to left,
+      var(--color-surface),
+      transparent
+    );
+  }
+
   /* ---- Dark band ----
      A full-width deep-green band. Used sparingly to break the page's long run
      of pale cards — the stat bar and the closing CTA. */
