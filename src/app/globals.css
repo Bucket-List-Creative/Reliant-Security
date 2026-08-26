@@ -68,6 +68,15 @@
   --shadow-soft-4: 12px 12px 24px #c2cac7, -12px -12px 24px #ffffff;
   --shadow-soft-5: 18px 18px 36px #bfc8c4, -18px -18px 36px #ffffff;
 
+  /* ---- Elevation (floating overlays) ----
+     The soft-* pairs above carry a white highlight (-Xpx -Xpx … #ffffff) as
+     their second shadow. That reads as light falling on a surface embedded in
+     the neumorphic plane — but on something that floats ABOVE the page, like a
+     dropdown or a menu sheet, the highlight has no surface to sit on and shows
+     up as a white shimmer around the top-left edge. Overlays use this
+     dark-only elevation instead. */
+  --shadow-overlay: 0 18px 42px rgb(0 0 0 / 0.20), 0 4px 12px rgb(0 0 0 / 0.10);
+
   /* ---- Elevation (inset / wells) ---- */
   --shadow-soft-in: inset 6px 6px 12px #c9d1ce, inset -6px -6px 12px #ffffff;
   --shadow-soft-in-sm: inset 3px 3px 6px #c9d1ce, inset -3px -3px 6px #ffffff;

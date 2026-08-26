@@ -17,7 +17,7 @@ export function CtaBanner({
             brand colour, with the pale card sections between them. */}
         <div
           className="sfc-band px-6 py-14 text-center sm:px-8 sm:py-16"
-          style={{ boxShadow: "var(--shadow-soft-4)" }}
+          style={{ boxShadow: "var(--shadow-overlay)" }}
         >
           <h2 className="mx-auto max-w-2xl text-3xl font-bold sm:text-4xl">
             {heading}

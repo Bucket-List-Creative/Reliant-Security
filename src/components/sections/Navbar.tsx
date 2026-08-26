@@ -325,7 +325,7 @@ export function Navbar({
           <div
             id="mobile-menu"
             className="mt-2 max-h-[calc(100dvh-7rem)] overflow-y-auto overscroll-contain rounded-[var(--radius-lg)] bg-surface-raised p-3 min-[880px]:hidden"
-            style={{ boxShadow: "var(--shadow-soft-3)" }}
+            style={{ boxShadow: "var(--shadow-overlay)" }}
           >
             <ul className="flex flex-col gap-1">
               {NAV.map((item) => {
@@ -486,7 +486,7 @@ function DropdownPanel({
     >
       <div
         className="max-h-[min(70vh,32rem)] overflow-y-auto overscroll-contain rounded-[var(--radius-lg)] bg-surface-raised p-4"
-        style={{ boxShadow: "var(--shadow-soft-4)" }}
+        style={{ boxShadow: "var(--shadow-overlay)" }}
       >
         {item.columns ? (
           <>

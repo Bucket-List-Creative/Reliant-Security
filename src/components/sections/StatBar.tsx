@@ -42,7 +42,7 @@ export function StatBar({
             thing after the hero — it needs to land. */}
         <div
           className="sfc-band px-6 py-10 sm:px-10 sm:py-12"
-          style={{ boxShadow: "var(--shadow-soft-4)" }}
+          style={{ boxShadow: "var(--shadow-overlay)" }}
         >
           {heading && (
             <h2 className="mx-auto mb-10 max-w-2xl text-center font-display text-2xl font-bold sm:text-3xl">
