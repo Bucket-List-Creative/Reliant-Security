@@ -45,9 +45,6 @@ const FALLBACK: Testimonial[] = [
   },
 ];
 
-/** Rotated across the testimonial cards so the row isn't monochrome. */
-const ACCENTS = ["sfc-accent-green", "sfc-accent-blue", "sfc-accent-amber"];
-
 function Stars({ rating = 5 }: { rating?: number }) {
   return (
     <div
@@ -59,7 +56,7 @@ function Stars({ rating = 5 }: { rating?: number }) {
         <IconStarFilled
           key={i}
           size={16}
-          className={i < rating ? "text-brand" : "text-n-300"}
+          className={i < rating ? "text-white" : "text-white/30"}
         />
       ))}
     </div>
@@ -82,16 +79,16 @@ export function Testimonials({
           {heading}
         </h2>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((t, i) => (
+          {items.map((t) => (
             <Card
               key={t._id}
-              className={`sfc-card--accent ${ACCENTS[i % ACCENTS.length]} relative flex h-full flex-col`}
+              className="sfc-card--solid relative flex h-full flex-col"
             >
-              {/* Oversized quote mark, tinted to the card's accent. */}
+              {/* Oversized quote mark, in white at low opacity so it reads as
+                  relief on the green rather than as a second colour. */}
               <span
                 aria-hidden
-                className="pointer-events-none absolute right-5 top-2 select-none font-display text-[5rem] leading-none opacity-20"
-                style={{ color: "var(--accent)" }}
+                className="pointer-events-none absolute right-5 top-2 select-none font-display text-[5rem] leading-none text-white/15"
               >
                 &rdquo;
               </span>
@@ -109,9 +106,9 @@ export function Testimonials({
                   />
                 )}
                 <div>
-                  <div className="font-semibold">{t.authorName}</div>
+                  <div className="font-semibold text-white">{t.authorName}</div>
                   {t.authorRole && (
-                    <div className="text-sm text-n-500">{t.authorRole}</div>
+                    <div className="text-sm text-white/65">{t.authorRole}</div>
                   )}
                 </div>
               </div>

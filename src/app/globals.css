@@ -30,29 +30,22 @@
   --color-n-800: #343a38;
   --color-n-900: #232727;
 
-  /* ---- Accents ----
-     A categorical palette for cards, icon tiles, and section bands. The soft
-     UI base is a single pale grey-green, which left every card on the site
-     looking identical; these give sections a way to differentiate without
-     abandoning the neumorphic language.
+  /* ---- Brand tints ----
+     Card fills stay inside the brand green family. An earlier version used six
+     unrelated hues (blue, amber, violet, rose…) which gave the page variety at
+     the cost of looking like a different company on every section. Variety now
+     comes from TONE and from alternating tinted vs solid-green sections, not
+     from foreign hues.
 
-     Hues are spaced far enough apart to read as distinct at icon size, but all
-     sit at a similar mid-dark value so no single one shouts. Use the `-soft`
-     tints for fills and the base colour for the glyph or rule on top of it —
-     each pairing clears 4.5:1 against the tinted background. */
-  --color-accent-green: #008c58;
-  --color-accent-blue: #1d6fd0;
-  --color-accent-teal: #0e8f8f;
-  --color-accent-amber: #a8700a;
-  --color-accent-violet: #6d55d4;
-  --color-accent-rose: #c2456a;
+     `--color-brand-*-rgb` mirror the hex values as space-separated triplets so
+     alpha variants can be derived with rgb(... / X%). Keep them in sync. */
+  --color-brand-tint: #dcece4;
+  --color-brand-tint-deep: #cbe4d8;
+  --color-brand-deep: #005c3c;
+  --color-brand-darkest: #00432c;
 
-  --color-accent-green-soft: #d6ebe2;
-  --color-accent-blue-soft: #dbe7f8;
-  --color-accent-teal-soft: #d6eded;
-  --color-accent-amber-soft: #f4e8d2;
-  --color-accent-violet-soft: #e4dff8;
-  --color-accent-rose-soft: #f7dfe6;
+  --color-brand-rgb: 0 140 88;
+  --color-brand-press-rgb: 0 115 74;
 
   /* ---- Semantic / state ---- */
   --color-success: #12a265;
@@ -76,6 +69,16 @@
      up as a white shimmer around the top-left edge. Overlays use this
      dark-only elevation instead. */
   --shadow-overlay: 0 18px 42px rgb(0 0 0 / 0.20), 0 4px 12px rgb(0 0 0 / 0.10);
+
+  /* ---- Elevation (on solid green) ----
+     The soft-* pairs are mixed for the pale grey-green surface; over brand
+     green their #ffffff highlight blows out. These keep the same two-light
+     neumorphic logic — darker green down-right, lighter green up-left — so a
+     solid green card reads as the same material as the rest of the system. */
+  --shadow-green-2: 5px 5px 10px #00623d, -5px -5px 10px #00b673;
+  --shadow-green-3: 8px 8px 16px #005c3a, -8px -8px 16px #00bc78;
+  --shadow-green-4: 12px 12px 24px #005536, -12px -12px 24px #00c47e;
+  --shadow-green-in-sm: inset 3px 3px 6px #00623d, inset -3px -3px 6px #00b673;
 
   /* ---- Elevation (inset / wells) ---- */
   --shadow-soft-in: inset 6px 6px 12px #c9d1ce, inset -6px -6px 12px #ffffff;
@@ -306,90 +309,87 @@
     font-size: 1.5rem;
   }
 
-  /* ---- Accent cards ----
-     Set `--accent` / `--accent-soft` on the card (see `.sfc-accent-*` below)
-     and the surface, icon tile, and hover state all follow from it.
+  /* ---- Card variants ----
+     Two treatments, both in brand green, alternated section by section so the
+     page has rhythm without introducing colours from outside the brand.
 
-     The card is FILLED with its accent tint rather than carrying a coloured
-     rule on a grey body — a stripe on grey still reads as a grey card. The
-     tint is lifted at the top-right by a soft wash of the accent so the fill
-     has some depth, and the icon tile is solid accent with a white glyph to
-     give each card a definite focal point. */
-  /* Alpha variants come from `--accent-rgb` rather than `color-mix()`.
-     Lightning CSS expands every color-mix into a full-opacity fallback plus an
-     @supports block — so a browser without color-mix would render the wash,
-     border, and glow at 100% opacity, i.e. a solid saturated blob. The rgb()
-     slash syntax has no such fallback path and emits about half the CSS. */
-  .sfc-card--accent {
+       .sfc-card--tint   pale green fill, solid green icon tile, ink text
+       .sfc-card--solid  solid brand green, white text, green neumorphic relief
+
+     `--solid` is deliberately the ORIGINAL neumorphic card recipe with the
+     surface swapped from pale grey-green to brand green: same two-light
+     relief, same inset icon well, just rendered in green with the highlight
+     carried by white content instead of a white surface. */
+
+  /* --- Tinted --- */
+  .sfc-card--tint {
     position: relative;
     overflow: hidden;
     background:
       radial-gradient(
-        125% 100% at 100% 0%,
-        rgb(var(--accent-rgb) / 16%),
-        transparent 62%
+        130% 100% at 100% 0%,
+        rgb(var(--color-brand-rgb) / 12%),
+        transparent 60%
       ),
-      var(--accent-soft, var(--color-surface-raised));
-    border: 1px solid rgb(var(--accent-rgb) / 20%);
-    box-shadow: 0 6px 18px rgb(var(--accent-rgb) / 12%);
+      var(--color-brand-tint);
+    border: 1px solid rgb(var(--color-brand-rgb) / 18%);
+    box-shadow: 0 6px 18px rgb(var(--color-brand-rgb) / 10%);
     transition:
       box-shadow var(--dur-base) var(--ease-soft),
       transform var(--dur-base) var(--ease-soft),
       border-color var(--dur-base) var(--ease-soft);
   }
-  .sfc-card--accent .sfc-card__icon {
-    background: var(--accent, var(--color-brand));
+  .sfc-card--tint .sfc-card__icon {
+    background: var(--color-brand);
     color: var(--color-white);
-    box-shadow: 0 6px 14px rgb(var(--accent-rgb) / 38%);
+    box-shadow: 0 6px 14px rgb(var(--color-brand-rgb) / 34%);
   }
-  /* Body copy sits on a tint rather than the neutral surface, so it needs a
-     touch more weight to hold the same contrast. */
-  .sfc-card--accent p {
+  .sfc-card--tint p {
     color: var(--color-n-800);
   }
-  .sfc-card--interactive.sfc-card--accent:hover {
+  .sfc-card--interactive.sfc-card--tint:hover {
     transform: translateY(-3px);
-    border-color: rgb(var(--accent-rgb) / 38%);
-    box-shadow: 0 14px 30px rgb(var(--accent-rgb) / 22%);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .sfc-card--interactive.sfc-card--accent:hover {
-      transform: none;
-    }
+    border-color: rgb(var(--color-brand-rgb) / 34%);
+    box-shadow: 0 14px 30px rgb(var(--color-brand-rgb) / 20%);
   }
 
-  /* `--accent-rgb` is the same colour as `--accent`, as a space-separated
-     triplet, so alpha variants can be derived with rgb(... / X%). Keep the two
-     in sync when changing a hue. */
-  .sfc-accent-green {
-    --accent: var(--color-accent-green);
-    --accent-rgb: 0 140 88;
-    --accent-soft: var(--color-accent-green-soft);
+  /* --- Solid green --- */
+  .sfc-card--solid {
+    position: relative;
+    overflow: hidden;
+    background: var(--color-brand);
+    color: var(--color-white);
+    border: 1px solid rgb(255 255 255 / 0.10);
+    box-shadow: var(--shadow-green-3);
+    transition:
+      box-shadow var(--dur-base) var(--ease-soft),
+      transform var(--dur-base) var(--ease-soft);
   }
-  .sfc-accent-blue {
-    --accent: var(--color-accent-blue);
-    --accent-rgb: 29 111 208;
-    --accent-soft: var(--color-accent-blue-soft);
+  .sfc-card--solid h2,
+  .sfc-card--solid h3,
+  .sfc-card--solid h4 {
+    color: var(--color-white);
   }
-  .sfc-accent-teal {
-    --accent: var(--color-accent-teal);
-    --accent-rgb: 14 143 143;
-    --accent-soft: var(--color-accent-teal-soft);
+  .sfc-card--solid p {
+    color: rgb(255 255 255 / 0.82);
   }
-  .sfc-accent-amber {
-    --accent: var(--color-accent-amber);
-    --accent-rgb: 168 112 10;
-    --accent-soft: var(--color-accent-amber-soft);
+  /* The icon well is inset, as on the original card — but lit in green, and
+     the glyph is white so it reads as the highlight. */
+  .sfc-card--solid .sfc-card__icon {
+    background: var(--color-brand);
+    color: var(--color-white);
+    box-shadow: var(--shadow-green-in-sm);
   }
-  .sfc-accent-violet {
-    --accent: var(--color-accent-violet);
-    --accent-rgb: 109 85 212;
-    --accent-soft: var(--color-accent-violet-soft);
+  .sfc-card--interactive.sfc-card--solid:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-green-4);
   }
-  .sfc-accent-rose {
-    --accent: var(--color-accent-rose);
-    --accent-rgb: 194 69 106;
-    --accent-soft: var(--color-accent-rose-soft);
+
+  @media (prefers-reduced-motion: reduce) {
+    .sfc-card--interactive.sfc-card--tint:hover,
+    .sfc-card--interactive.sfc-card--solid:hover {
+      transform: none;
+    }
   }
 
   /* ---- Dark band ----

@@ -38,16 +38,6 @@ const FALLBACK: Pick<
   },
 ];
 
-/** Rotated across the grid so a row of service cards isn't monochrome. */
-const ACCENTS = [
-  "sfc-accent-green",
-  "sfc-accent-teal",
-  "sfc-accent-violet",
-  "sfc-accent-blue",
-  "sfc-accent-amber",
-  "sfc-accent-rose",
-];
-
 export function ServicesGrid({
   services,
   heading = "What we protect",
@@ -70,28 +60,32 @@ export function ServicesGrid({
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {items.map((service, i) => {
+          {items.map((service) => {
             const inner = (
               <>
-                <CardIcon>
-                  <ServiceIcon
-                    name={
-                      isServiceIconKey(service.iconKey)
-                        ? service.iconKey
-                        : "shield-check"
-                    }
-                    size={26}
-                  />
-                </CardIcon>
-                <h3 className="mt-5 text-xl font-semibold">{service.title}</h3>
-                <p className="mt-2 text-[0.95rem] leading-relaxed text-n-700">
+                <div className="flex items-center gap-4">
+                  <CardIcon>
+                    <ServiceIcon
+                      name={
+                        isServiceIconKey(service.iconKey)
+                          ? service.iconKey
+                          : "shield-check"
+                      }
+                      size={26}
+                    />
+                  </CardIcon>
+                  <h3 className="text-lg font-semibold leading-snug">
+                    {service.title}
+                  </h3>
+                </div>
+                <p className="mt-4 flex-1 text-[0.9rem] leading-relaxed">
                   {service.summary}
                 </p>
               </>
             );
 
             const slug = "slug" in service ? service.slug : undefined;
-            const cardClass = `sfc-card--accent ${ACCENTS[i % ACCENTS.length]} h-full`;
+            const cardClass = "sfc-card--solid flex h-full flex-col";
 
             return showLinks && slug ? (
               <Link

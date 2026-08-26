@@ -86,62 +86,45 @@ const DIFFERENTIATORS: {
   },
 ];
 
-/** Rotated across the differentiator cards so the grid isn't monochrome. */
-const DIFF_ACCENTS = [
-  "sfc-accent-green",
-  "sfc-accent-amber",
-  "sfc-accent-violet",
-  "sfc-accent-blue",
-  "sfc-accent-teal",
-  "sfc-accent-rose",
-];
-
 const CUSTOMERS: {
   name: string;
   description: string;
   iconKey: ServiceIconKey;
-  accent: string;
 }[] = [
   {
     name: "Residential",
     description: "Alarms, cameras, smart control, and monitoring for homes.",
     iconKey: "home",
-    accent: "sfc-accent-green",
   },
   {
     name: "Custom Homes",
     description:
       "Pre-construction design, structured cabling, AV, and whole-home integration.",
     iconKey: "custom-home",
-    accent: "sfc-accent-teal",
   },
   {
     name: "Multi-Family",
     description:
       "Access control, intercoms, and common-area surveillance for communities.",
     iconKey: "multi-family",
-    accent: "sfc-accent-rose",
   },
   {
     name: "Commercial",
     description:
       "Offices, retail, healthcare, and warehousing across the metro and beyond.",
     iconKey: "building",
-    accent: "sfc-accent-blue",
   },
   {
     name: "Industrial",
     description:
       "Plants and manufacturing sites, including harsh-environment installations.",
     iconKey: "factory",
-    accent: "sfc-accent-amber",
   },
   {
     name: "Government & DoD",
     description:
       "Federal, State, Municipal, and Department of Defense facilities.",
     iconKey: "government",
-    accent: "sfc-accent-violet",
   },
 ];
 
@@ -235,16 +218,19 @@ export default async function AboutPage() {
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {DIFFERENTIATORS.map((d, i) => (
-              <Card
-                key={d.title}
-                className={`sfc-card--accent ${DIFF_ACCENTS[i % DIFF_ACCENTS.length]} flex h-full flex-col`}
-              >
-                <CardIcon>
-                  <ServiceIcon name={d.iconKey} size={26} />
-                </CardIcon>
-                <h3 className="mt-5 text-lg font-semibold">{d.title}</h3>
-                <p className="mt-2 flex-1">{d.description}</p>
+            {DIFFERENTIATORS.map((d) => (
+              <Card key={d.title} className="sfc-card--tint flex h-full flex-col">
+                <div className="flex items-center gap-4">
+                  <CardIcon>
+                    <ServiceIcon name={d.iconKey} size={26} />
+                  </CardIcon>
+                  <h3 className="text-lg font-semibold leading-snug">
+                    {d.title}
+                  </h3>
+                </div>
+                <p className="mt-4 flex-1 text-[0.9rem] leading-relaxed">
+                  {d.description}
+                </p>
               </Card>
             ))}
           </div>
@@ -265,13 +251,15 @@ export default async function AboutPage() {
             {CUSTOMERS.map((c) => (
               <Card
                 key={c.name}
-                className={`sfc-card--accent ${c.accent} flex h-full flex-col`}
+                className="sfc-card--solid flex h-full flex-col items-center text-center"
               >
                 <CardIcon>
                   <ServiceIcon name={c.iconKey} size={26} />
                 </CardIcon>
                 <h3 className="mt-5 text-lg font-semibold">{c.name}</h3>
-                <p className="mt-2 flex-1 text-n-700">{c.description}</p>
+                <p className="mt-2.5 flex-1 text-[0.9rem] leading-relaxed">
+                  {c.description}
+                </p>
               </Card>
             ))}
           </div>
