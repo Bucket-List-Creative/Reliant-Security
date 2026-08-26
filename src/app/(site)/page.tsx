@@ -5,7 +5,7 @@ import {
   TESTIMONIALS_QUERY,
   FAQS_QUERY,
   SITE_SETTINGS_QUERY,
-  FEATURED_CASE_STUDIES_QUERY,
+  FEATURED_PROJECTS_QUERY,
   INDUSTRIES_QUERY,
 } from "@/sanity/lib/queries";
 import type {
@@ -14,49 +14,54 @@ import type {
   Testimonial,
   Faq,
   SiteSettings,
-  CaseStudyListItem,
+  ProjectListItem,
   IndustryListItem,
 } from "@/sanity/lib/types";
 import { Container } from "@/components/ui/Container";
 import { ServiceAreaMap } from "@/components/ui/ServiceAreaMap";
 import { Hero } from "@/components/sections/Hero";
 import { StatBar } from "@/components/sections/StatBar";
+import { CapabilitiesGrid } from "@/components/sections/CapabilitiesGrid";
 import { ServicesGrid } from "@/components/sections/ServicesGrid";
 import { IndustriesStrip } from "@/components/sections/IndustriesStrip";
-import { CaseStudiesStrip } from "@/components/sections/CaseStudiesStrip";
+import { ProjectsStrip } from "@/components/sections/ProjectsStrip";
 import { Testimonials } from "@/components/sections/Testimonials";
 import { FaqAccordion } from "@/components/sections/FaqAccordion";
 import { CtaBanner } from "@/components/sections/CtaBanner";
+import { PROJECTS } from "@/content/projects";
+import { publicAssetOrUndefined } from "@/lib/publicAssets";
+
+/** Slug → local hero photo, for taxonomy-sourced projects. */
+const LOCAL_PROJECT_IMAGES = new Map(
+  PROJECTS.map((p) => [p.slug, publicAssetOrUndefined(p.image)]),
+);
 
 export default async function HomePage() {
-  const [
-    services,
-    stats,
-    industries,
-    caseStudies,
-    testimonials,
-    faqs,
-    settings,
-  ] = await Promise.all([
-    sanityFetch({ query: SERVICES_QUERY }),
-    sanityFetch({ query: STATS_QUERY }),
-    sanityFetch({ query: INDUSTRIES_QUERY }),
-    sanityFetch({ query: FEATURED_CASE_STUDIES_QUERY }),
-    sanityFetch({ query: TESTIMONIALS_QUERY }),
-    sanityFetch({ query: FAQS_QUERY }),
-    sanityFetch({ query: SITE_SETTINGS_QUERY }),
-  ]);
+  const [services, stats, industries, projects, testimonials, faqs, settings] =
+    await Promise.all([
+      sanityFetch({ query: SERVICES_QUERY }),
+      sanityFetch({ query: STATS_QUERY }),
+      sanityFetch({ query: INDUSTRIES_QUERY }),
+      sanityFetch({ query: FEATURED_PROJECTS_QUERY }),
+      sanityFetch({ query: TESTIMONIALS_QUERY }),
+      sanityFetch({ query: FAQS_QUERY }),
+      sanityFetch({ query: SITE_SETTINGS_QUERY }),
+    ]);
 
   const phone = (settings.data as SiteSettings | null)?.phone;
 
   return (
     <>
       <Hero />
+      {/* Monitoring-network stats sit high on the page, per client feedback. */}
       <StatBar stats={stats.data as Stat[]} />
+      {/* Full scope of the company, before anything residential-specific. */}
+      <CapabilitiesGrid />
       <ServicesGrid services={services.data as Service[]} />
       <IndustriesStrip industries={industries.data as IndustryListItem[]} />
-      <CaseStudiesStrip
-        caseStudies={caseStudies.data as CaseStudyListItem[]}
+      <ProjectsStrip
+        projects={projects.data as ProjectListItem[]}
+        localImageBySlug={LOCAL_PROJECT_IMAGES}
       />
       <Testimonials testimonials={testimonials.data as Testimonial[]} />
 
@@ -67,11 +72,21 @@ export default async function HomePage() {
               Serving the greater St.&nbsp;Louis area
             </h2>
             <p className="mt-4 text-lg text-n-700">
-              Local, licensed, and responsive — search the map to see the
-              communities we protect across the St.&nbsp;Louis metro.
+              Reliant is locally owned and operated out of
+              O&apos;Fallon,&nbsp;Missouri, serving communities across the
+              St.&nbsp;Louis metro — and travelling further for commercial,
+              industrial, and government projects.
             </p>
           </div>
-          <ServiceAreaMap height={460} />
+          {/* Clean outline with a single home-location pin. The full
+              searchable community map lives on the Contact page. */}
+          <ServiceAreaMap
+            height={460}
+            pins="home"
+            showSearch={false}
+            showFilter={false}
+            showSidebar={false}
+          />
         </Container>
       </section>
 

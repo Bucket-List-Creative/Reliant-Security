@@ -3,9 +3,17 @@ import type { ServiceIconKey } from "@/components/ui/ServiceIcon";
 /**
  * Service taxonomy — the single source of truth for the Services index groups,
  * the individual /services/[slug] detail pages, and the navbar mega-menu.
- * Mirrors the categories on the live Reliant site (secure-reliant.com):
- * Alarm Systems, Video & Surveillance, Smart Home & Access, Infrastructure,
- * and Additional Services.
+ *
+ * Category order is deliberate: Alarm Systems, Video & Surveillance,
+ * Infrastructure, Smart Home & Access, Additional Services. Infrastructure
+ * (structured cabling & fiber) sits third rather than fourth because it is a
+ * core commercial and industrial capability, not an afterthought — don't
+ * demote it back down without a reason.
+ *
+ * Copy must serve both residential and commercial readers. Reliant runs
+ * everything from single-family alarms to large industrial and government
+ * projects, so service copy that only speaks to homeowners misrepresents the
+ * company.
  *
  * Copy here is the built-in default. When matching `service` documents exist in
  * Sanity (matched by `slug`), the pages prefer the CMS values — see the merge
@@ -375,6 +383,137 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
     ],
   },
   {
+    slug: "infrastructure",
+    title: "Structured Cabling, Fiber & AV",
+    iconKey: "network",
+    blurb:
+      "The backbone everything else runs on — certified Cat6/Cat6A and fiber, racks and pathways, network infrastructure, and distributed audio/video for commercial, industrial, and residential sites alike.",
+    services: [
+      {
+        slug: "network-cabling",
+        title: "Structured Cabling & Fiber",
+        iconKey: "network",
+        tagline: "Cat6/Cat6A, fiber, racks & pathways",
+        summary:
+          "Certified Cat6/Cat6A copper and single- and multi-mode fiber — plus racks, pathways, and network infrastructure — engineered, tested, labeled, and documented.",
+        features: [
+          "Cat6 / Cat6A structured cabling",
+          "Single & multi-mode fiber",
+          "Racks, pathways & cable management",
+          "Certified, tested & labeled runs",
+          "Switching, Wi-Fi & network setup",
+          "As-built documentation",
+        ],
+        overview: [
+          "Structured cabling is the backbone every other system rides on — cameras, access control, Wi-Fi, phones, and the business applications behind them. Reliant designs and installs certified Cat6 and Cat6A copper alongside single- and multi-mode fiber, sized for the bandwidth a site needs now and the growth it hasn't planned for yet.",
+          "This is core commercial and industrial work for us, not an add-on. We handle the full scope: pathway and rack design, cable runs across separated buildings, terminations, certification testing, labeling, and as-built documentation. On government and public-sector projects we deliver to the written specification, including submittals and test results.",
+          "Because the same team also installs the surveillance, access control, and AV that ride on the cabling, there's no gap between the infrastructure contractor and the systems integrator — and no argument about whose problem it is when something needs attention.",
+        ],
+        benefits: [
+          {
+            title: "Certified & tested",
+            description:
+              "Cat6/Cat6A and fiber runs terminated to standard and certification-tested, with results documented.",
+          },
+          {
+            title: "Built for distance",
+            description:
+              "Fiber backbones tie separated buildings, plants, and outbuildings into one reliable network.",
+          },
+          {
+            title: "Future-ready capacity",
+            description:
+              "Infrastructure sized with headroom so you're not rewiring when the camera count doubles.",
+          },
+          {
+            title: "Organized & documented",
+            description:
+              "Labeled runs, tidy racks, and as-builts that make support and expansion straightforward.",
+          },
+        ],
+        faqs: [
+          {
+            question: "Do you handle both the cabling and the network gear?",
+            answer:
+              "Yes. We run and certify the cabling and configure the switching, Wi-Fi, and networking that rides on it — one accountable team rather than two contractors pointing at each other.",
+          },
+          {
+            question: "Can you run fiber between separate buildings?",
+            answer:
+              "Routinely. Single- and multi-mode fiber is how we connect plants, offices, scale houses, and outbuildings that are too far apart for copper — a standard part of our industrial and campus work.",
+          },
+          {
+            question: "Can you cable a building that's already occupied?",
+            answer:
+              "Yes. We regularly work around live operations and production schedules, phasing the work and coordinating with your team to keep disruption down.",
+          },
+          {
+            question: "Do you provide certification testing and documentation?",
+            answer:
+              "Every run is tested and labeled, and we provide test results and as-built documentation. On specified commercial and government projects, submittals and closeout documentation are part of the deliverable.",
+          },
+          {
+            question: "Can you supply NDAA/TAA-compliant equipment?",
+            answer:
+              "Yes. Where a project requires NDAA Section 889 or TAA-compliant hardware, we specify and supply it. We aren't tied to a single manufacturer, so we build to the compliance requirement rather than around it.",
+          },
+        ],
+      },
+      {
+        slug: "audio-video",
+        title: "Audio & Video",
+        iconKey: "speaker",
+        tagline: "Distributed AV & sound",
+        summary:
+          "Distributed audio, video displays, and conferencing for homes and businesses — clean installs with intuitive, one-touch control.",
+        features: [
+          "Whole-property audio",
+          "TV & display mounting",
+          "Conference-room AV",
+          "Single-remote control",
+        ],
+        overview: [
+          "Great audio and video make a space more enjoyable and more productive. Reliant designs and installs distributed sound, television displays, and conferencing systems for homes and businesses alike.",
+          "From whole-property music to a boardroom that's ready for a video call at the touch of a button, we handle the design, wiring, and setup — and make it simple to control.",
+        ],
+        benefits: [
+          {
+            title: "Seamless experiences",
+            description:
+              "Audio and video that just work, controlled from one remote or app.",
+          },
+          {
+            title: "Clean installations",
+            description:
+              "Mounted displays and concealed wiring for a polished, professional look.",
+          },
+          {
+            title: "Built for the room",
+            description:
+              "Systems tuned to the space, whether it's a patio, showroom, or conference room.",
+          },
+        ],
+        faqs: [
+          {
+            question: "Can you install audio in multiple rooms?",
+            answer:
+              "Yes. Distributed audio lets you play the same or different sources in each zone, all controlled centrally.",
+          },
+          {
+            question: "Do you set up conference-room video?",
+            answer:
+              "We design and install complete conferencing AV — displays, cameras, microphones, and one-touch control.",
+          },
+          {
+            question: "Will everything be on one remote?",
+            answer:
+              "We consolidate control so you're not juggling multiple remotes or apps to run the room.",
+          },
+        ],
+      },
+    ],
+  },
+  {
     slug: "smart-access",
     title: "Smart Home & Access",
     iconKey: "home",
@@ -488,124 +627,11 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
     ],
   },
   {
-    slug: "infrastructure",
-    title: "Infrastructure",
-    iconKey: "network",
-    blurb:
-      "The wiring and connectivity backbone that everything else runs on — done right the first time, to code.",
-    services: [
-      {
-        slug: "network-cabling",
-        title: "Network Cabling",
-        iconKey: "network",
-        tagline: "Structured low-voltage cabling",
-        summary:
-          "Structured Cat6/fiber cabling and networking that give your cameras, access control, and devices a fast, dependable backbone.",
-        features: [
-          "Cat6 / fiber structured cabling",
-          "Wi-Fi & network setup",
-          "Server & rack termination",
-          "Certified & labeled runs",
-        ],
-        overview: [
-          "Every camera, access reader, and connected device depends on a solid network. Reliant installs structured Cat6 and fiber cabling that gives your systems the bandwidth and reliability they need — now and as you grow.",
-          "We plan, run, terminate, label, and test every cable to industry standards, so your infrastructure is clean, documented, and ready for whatever you connect to it.",
-        ],
-        benefits: [
-          {
-            title: "Built to standard",
-            description:
-              "Certified Cat6 and fiber runs, properly terminated and tested.",
-          },
-          {
-            title: "Future-ready capacity",
-            description:
-              "Infrastructure sized for growth so you're not rewiring in a year.",
-          },
-          {
-            title: "Organized & documented",
-            description:
-              "Labeled runs and tidy racks make support and expansion simple.",
-          },
-        ],
-        faqs: [
-          {
-            question: "Do you handle both cabling and the network gear?",
-            answer:
-              "Yes. We can run the cabling and configure the switches, Wi-Fi, and networking that ride on it, so it's one accountable team.",
-          },
-          {
-            question: "Can you cable a building that's already occupied?",
-            answer:
-              "We routinely work around live operations and schedule the work to minimize disruption to your day.",
-          },
-          {
-            question: "Will the cabling support future upgrades?",
-            answer:
-              "We design for headroom, so your network can handle more cameras, devices, and bandwidth down the road.",
-          },
-        ],
-      },
-      {
-        slug: "audio-video",
-        title: "Audio & Video",
-        iconKey: "speaker",
-        tagline: "Distributed AV & sound",
-        summary:
-          "Distributed audio, video displays, and conferencing for homes and businesses — clean installs with intuitive, one-touch control.",
-        features: [
-          "Whole-property audio",
-          "TV & display mounting",
-          "Conference-room AV",
-          "Single-remote control",
-        ],
-        overview: [
-          "Great audio and video make a space more enjoyable and more productive. Reliant designs and installs distributed sound, television displays, and conferencing systems for homes and businesses alike.",
-          "From whole-property music to a boardroom that's ready for a video call at the touch of a button, we handle the design, wiring, and setup — and make it simple to control.",
-        ],
-        benefits: [
-          {
-            title: "Seamless experiences",
-            description:
-              "Audio and video that just work, controlled from one remote or app.",
-          },
-          {
-            title: "Clean installations",
-            description:
-              "Mounted displays and concealed wiring for a polished, professional look.",
-          },
-          {
-            title: "Built for the room",
-            description:
-              "Systems tuned to the space, whether it's a patio, showroom, or conference room.",
-          },
-        ],
-        faqs: [
-          {
-            question: "Can you install audio in multiple rooms?",
-            answer:
-              "Yes. Distributed audio lets you play the same or different sources in each zone, all controlled centrally.",
-          },
-          {
-            question: "Do you set up conference-room video?",
-            answer:
-              "We design and install complete conferencing AV — displays, cameras, microphones, and one-touch control.",
-          },
-          {
-            question: "Will everything be on one remote?",
-            answer:
-              "We consolidate control so you're not juggling multiple remotes or apps to run the room.",
-          },
-        ],
-      },
-    ],
-  },
-  {
     slug: "additional-services",
     title: "Additional Services",
     iconKey: "grid",
     blurb:
-      "Round out your protection with digital security and IT support from a team that already knows your systems.",
+      "Round out your protection with cyber security and managed IT, delivered through our trusted technology partner alongside the systems we install.",
     services: [
       {
         slug: "cyber-security",
@@ -622,7 +648,7 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
         ],
         overview: [
           "Physical security keeps intruders out of your building; cyber security keeps them out of your network. As cameras, access control, and business systems move online, protecting that digital layer is no longer optional.",
-          "Reliant hardens your firewalls, protects your endpoints and email, and monitors for threats — so the same team that secures your premises also helps defend your data.",
+          "Reliant delivers cyber security through a trusted technology partner, coordinated alongside the systems we install — firewall and network hardening, endpoint and email protection, and ongoing threat monitoring. You get specialist capability without having to manage a separate vendor relationship yourself.",
         ],
         benefits: [
           {
@@ -673,8 +699,8 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
           "Hardware & software management",
         ],
         overview: [
-          "Managed IT keeps your technology running so you can focus on your business. Instead of reacting to problems, we proactively monitor, update, and maintain your systems to prevent them.",
-          "From patching and backups to help-desk support and hardware management, Reliant acts as your IT department — with the same reliability and local responsiveness you expect from our security team.",
+          "Managed IT keeps your technology running so you can focus on your business. Instead of reacting to problems, the service proactively monitors, updates, and maintains your systems to prevent them.",
+          "Reliant provides managed IT through a trusted technology partner, covering patching, backups, help-desk support, and hardware management. We coordinate it alongside the security and network infrastructure we install, so your technology and your protection stay joined up.",
         ],
         benefits: [
           {

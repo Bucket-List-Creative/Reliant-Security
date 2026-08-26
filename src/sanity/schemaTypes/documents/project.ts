@@ -1,9 +1,9 @@
 import { defineType, defineField, defineArrayMember } from "sanity";
 import { CaseIcon } from "@sanity/icons";
 
-export const caseStudy = defineType({
-  name: "caseStudy",
-  title: "Case study",
+export const project = defineType({
+  name: "project",
+  title: "Project",
   type: "document",
   icon: CaseIcon,
   fields: [
@@ -28,11 +28,39 @@ export const caseStudy = defineType({
     defineField({
       name: "industry",
       type: "string",
-      description: "e.g. Retail, Warehousing, Healthcare, Property Management.",
+      description:
+        "e.g. Industrial & Manufacturing, Commercial & Office, Multi-Family, Government.",
+    }),
+    defineField({
+      name: "segments",
+      title: "Segments",
+      type: "array",
+      description:
+        "Which markets this project demonstrates. Drives the filter on the Projects page.",
+      of: [defineArrayMember({ type: "string" })],
+      options: {
+        list: [
+          { title: "Residential", value: "residential" },
+          { title: "Commercial", value: "commercial" },
+          { title: "Industrial", value: "industrial" },
+          { title: "Government", value: "government" },
+        ],
+      },
     }),
     defineField({
       name: "location",
+      title: "General location",
       type: "string",
+      description:
+        "General location only — city and state, e.g. “Trenton, TN”. Never publish a customer's street address.",
+    }),
+    defineField({
+      name: "equipment",
+      title: "Major services & equipment",
+      type: "array",
+      description:
+        "Headline systems involved, e.g. “Fiber backbone”, “Industrial-rated IP cameras”, “Access control”.",
+      of: [defineArrayMember({ type: "string" })],
     }),
     defineField({
       name: "heroImage",

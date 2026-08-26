@@ -30,7 +30,7 @@ export const structure: StructureResolver = (S) =>
       S.divider(),
       S.documentTypeListItem("service").title("Services").icon(LockIcon),
       S.documentTypeListItem("industry").title("Industries").icon(ComponentIcon),
-      S.documentTypeListItem("caseStudy").title("Case studies").icon(CaseIcon),
+      S.documentTypeListItem("project").title("Projects").icon(CaseIcon),
       S.documentTypeListItem("plan").title("Pricing plans").icon(CreditCardIcon),
       S.documentTypeListItem("testimonial")
         .title("Testimonials")

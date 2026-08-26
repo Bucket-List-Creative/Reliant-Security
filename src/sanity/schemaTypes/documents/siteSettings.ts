@@ -30,7 +30,9 @@ export const siteSettings = defineType({
     }),
     defineField({
       name: "emergencyPhone",
-      title: "24/7 emergency line",
+      title: "24/7 monitoring line",
+      description:
+        "The monitoring centre line. Labelled 'monitoring', never 'emergency' — Reliant does not offer 24/7 emergency service or technical support, and the site must not imply it.",
       type: "string",
     }),
     defineField({

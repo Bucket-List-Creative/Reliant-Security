@@ -209,7 +209,7 @@ export default async function ContactPage() {
                     </span>
                     <div>
                       <p className="text-sm font-semibold uppercase tracking-wide text-n-500">
-                        24/7 Emergency line
+                        24/7 Monitoring line
                       </p>
                       <a
                         href={`tel:${emergencyPhone.replace(/[^\d+]/g, "")}`}

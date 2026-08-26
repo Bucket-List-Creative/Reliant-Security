@@ -11,9 +11,12 @@ type Props = {
 };
 
 export function Hero({
-  eyebrow = "Trusted protection, 24/7",
+  // "24/7" attaches to professional monitoring, never to service or support —
+  // Reliant does not offer round-the-clock emergency service or a 24/7 help
+  // desk, and the wording must not imply otherwise.
+  eyebrow = "24/7 Professional Monitoring",
   title = "Security that feels effortless.",
-  subtitle = "Reliant Security designs, installs, and monitors premium systems for homes and businesses — with rapid response you can count on.",
+  subtitle = "Reliant Security designs, installs, and services security and low-voltage systems for homes, custom homes, multi-family, commercial, industrial, and government facilities — backed by 24/7 professional monitoring.",
   primaryCta = { label: "Get a Same-Day Quote", href: "/contact" },
   secondaryCta = { label: "Explore services", href: "/services" },
 }: Props) {

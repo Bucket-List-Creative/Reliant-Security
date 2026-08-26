@@ -8,6 +8,7 @@ import {
   SERVICE_LOCATIONS,
   SERVICE_REGIONS,
   MAP_CONFIG,
+  HOME_BASE,
   type ServiceLocation,
   type ServiceRegion,
 } from "@/config/serviceAreas";
@@ -22,6 +23,12 @@ type Props = {
   showFilter?: boolean;
   showSidebar?: boolean;
   showBoundary?: boolean;
+  /**
+   * `"all"` drops a pin on every community. `"home"` draws the same
+   * service-area outline but marks only Reliant's O'Fallon home location —
+   * a cleaner read for the home page, where the dense pin cluster was noise.
+   */
+  pins?: "all" | "home";
   className?: string;
 };
 
@@ -72,6 +79,7 @@ export function ServiceAreaMap({
   showFilter = true,
   showSidebar = true,
   showBoundary = true,
+  pins = "all",
   className,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -165,7 +173,11 @@ export function ServiceAreaMap({
     layer.clearLayers();
     markerByName.current.clear();
 
-    visible.forEach((loc) => {
+    // The boundary is always computed from every visible community; only the
+    // pins differ between modes.
+    const pinned = pins === "home" ? [HOME_BASE] : visible;
+
+    pinned.forEach((loc) => {
       const icon = L.divIcon({
         className: "",
         html: `<div class="reliant-logo-pin"><img src="${LOGO_SRC}" alt="" /></div>`,
@@ -174,10 +186,10 @@ export function ServiceAreaMap({
         tooltipAnchor: [0, -42],
       });
       const m = L.marker([loc.lat, loc.lng], { icon }).addTo(layer);
-      m.bindTooltip(loc.name, {
-        direction: "top",
-        className: "reliant-map-tooltip",
-      });
+      m.bindTooltip(
+        pins === "home" ? `Reliant Security — ${loc.name}, MO` : loc.name,
+        { direction: "top", className: "reliant-map-tooltip" },
+      );
       m.on("click", () => setSelected(loc.name));
       markerByName.current.set(loc.name, m);
     });
@@ -204,7 +216,7 @@ export function ServiceAreaMap({
       bounds = L.latLngBounds(visible.map((l) => [l.lat, l.lng]));
     }
     if (bounds) map.fitBounds(bounds.pad(0.12));
-  }, [ready, visible, showBoundary]);
+  }, [ready, visible, showBoundary, pins]);
 
   // ---- Reflect the active selection on the marker ----
   useEffect(() => {

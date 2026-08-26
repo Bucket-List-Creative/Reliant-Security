@@ -160,39 +160,40 @@ export const POST_QUERY = defineQuery(/* groq */ `
   }
 `);
 
-/* ---- Case studies ---- */
-const caseStudyCardProjection = /* groq */ `
+/* ---- Projects ---- */
+const projectCardProjection = /* groq */ `
   _id,
   title,
   "slug": slug.current,
   client,
   industry,
   summary,
+  segments,
   featured,
   publishedAt,
   heroImage{ ${imageFragment} }
 `;
 
-export const CASE_STUDIES_QUERY = defineQuery(/* groq */ `
-  *[_type == "caseStudy" && defined(slug.current)]
+export const PROJECTS_QUERY = defineQuery(/* groq */ `
+  *[_type == "project" && defined(slug.current)]
   | order((featured == "featured") desc, order asc, publishedAt desc){
-    ${caseStudyCardProjection}
+    ${projectCardProjection}
   }
 `);
 
-export const FEATURED_CASE_STUDIES_QUERY = defineQuery(/* groq */ `
-  *[_type == "caseStudy" && defined(slug.current)]
+export const FEATURED_PROJECTS_QUERY = defineQuery(/* groq */ `
+  *[_type == "project" && defined(slug.current)]
   | order((featured == "featured") desc, order asc, publishedAt desc)[0...3]{
-    ${caseStudyCardProjection}
+    ${projectCardProjection}
   }
 `);
 
-export const CASE_STUDY_SLUGS_QUERY = defineQuery(/* groq */ `
-  *[_type == "caseStudy" && defined(slug.current)]{ "slug": slug.current }
+export const PROJECT_SLUGS_QUERY = defineQuery(/* groq */ `
+  *[_type == "project" && defined(slug.current)]{ "slug": slug.current }
 `);
 
-export const CASE_STUDY_QUERY = defineQuery(/* groq */ `
-  *[_type == "caseStudy" && slug.current == $slug][0]{
+export const PROJECT_QUERY = defineQuery(/* groq */ `
+  *[_type == "project" && slug.current == $slug][0]{
     _id,
     title,
     "slug": slug.current,
@@ -200,6 +201,8 @@ export const CASE_STUDY_QUERY = defineQuery(/* groq */ `
     industry,
     location,
     summary,
+    segments,
+    equipment,
     publishedAt,
     heroImage{ ${imageFragment} },
     results[]{ _key, value, label },
@@ -218,7 +221,7 @@ export const INDUSTRIES_QUERY = defineQuery(/* groq */ `
     "slug": slug.current,
     icon,
     summary,
-    segment,
+    segments,
     featured,
     heroImage{ ${imageFragment} }
   }
@@ -235,6 +238,7 @@ export const INDUSTRY_QUERY = defineQuery(/* groq */ `
     "slug": slug.current,
     icon,
     summary,
+    segments,
     heroImage{ ${imageFragment} },
     threats[]{ _key, title, description },
     solutions[]{ _key, title, description },

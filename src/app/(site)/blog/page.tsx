@@ -9,9 +9,9 @@ import { Badge } from "@/components/ui/Badge";
 import { SanityImage } from "@/components/ui/SanityImage";
 
 export const metadata: Metadata = {
-  title: "Learn",
+  title: "Resources",
   description:
-    "Buyer's guides, security tips, and product updates from the Reliant Security team.",
+    "Guides, buying advice, and industry insight on security, surveillance, access control, structured cabling, and monitoring — for homeowners, businesses, and facility managers.",
 };
 
 function formatDate(iso?: string) {
@@ -31,13 +31,16 @@ export default async function BlogIndexPage() {
     <section className="sfc-section pt-12">
       <Container>
         <div className="mb-12 max-w-2xl">
-          <Badge className="mb-5">Learn</Badge>
+          <Badge className="mb-5">Resources</Badge>
           <h1 className="text-4xl font-bold sm:text-5xl">
-            Buyer&apos;s guides &amp; security insights
+            Guides &amp; security insights
           </h1>
           <p className="mt-5 text-lg text-n-700">
-            Practical guidance to help you choose, plan, and get the most from
-            your security — plus product news and safety tips from our team.
+            Practical guidance on choosing, planning, and getting the most from
+            your security — for homeowners, business owners, and facility
+            managers alike. We cover surveillance, access control, structured
+            cabling and fiber, monitoring, and the compliance questions that
+            come up on commercial and government work.
           </p>
         </div>
 

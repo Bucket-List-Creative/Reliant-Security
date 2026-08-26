@@ -2,32 +2,117 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { sanityFetch } from "@/sanity/lib/live";
-import { client } from "@/sanity/lib/client";
-import { INDUSTRY_QUERY, INDUSTRY_SLUGS_QUERY } from "@/sanity/lib/queries";
+import { INDUSTRY_QUERY } from "@/sanity/lib/queries";
 import type { Industry } from "@/sanity/lib/types";
 import { Container } from "@/components/ui/Container";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardIcon } from "@/components/ui/Card";
 import { SanityImage } from "@/components/ui/SanityImage";
 import { CtaBanner } from "@/components/sections/CtaBanner";
+import {
+  ALL_INDUSTRY_SLUGS,
+  SEGMENT_LABELS,
+  findIndustryBySlug,
+  type TaxonomyIndustry,
+} from "@/content/industries";
+import { findServiceBySlug } from "@/content/services";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export async function generateStaticParams() {
-  const slugs = await client
-    .withConfig({ useCdn: false })
-    .fetch<{ slug: string }[]>(INDUSTRY_SLUGS_QUERY);
-  return slugs.map(({ slug }) => ({ slug }));
+/**
+ * Static params come from the built-in taxonomy rather than the CMS, so every
+ * industry card on the index links somewhere real even before Sanity has any
+ * `industry` documents. CMS-only industries are still rendered on demand.
+ */
+export function generateStaticParams() {
+  return ALL_INDUSTRY_SLUGS.map((slug) => ({ slug }));
+}
+
+/** Shape the page renders, whichever source it came from. */
+type DisplayIndustry = {
+  name: string;
+  icon?: string;
+  summary: string;
+  segments: string[];
+  overview: string[];
+  threats: { key: string; title: string; description?: string }[];
+  solutions: { key: string; title: string; description?: string }[];
+  services: {
+    key: string;
+    slug: string;
+    title: string;
+    icon?: string;
+    summary?: string;
+  }[];
+  heroImage?: Industry["heroImage"];
+};
+
+/** Sanity values win field by field; the taxonomy fills every gap. */
+function merge(
+  cms: Industry | null,
+  base: TaxonomyIndustry | undefined,
+): DisplayIndustry | null {
+  if (!cms && !base) return null;
+
+  const threats = cms?.threats?.length
+    ? cms.threats.map((t) => ({
+        key: t._key,
+        title: t.title,
+        description: t.description,
+      }))
+    : (base?.threats ?? []).map((t, i) => ({ key: `t${i}`, ...t }));
+
+  const solutions = cms?.solutions?.length
+    ? cms.solutions.map((s) => ({
+        key: s._key,
+        title: s.title,
+        description: s.description,
+      }))
+    : (base?.solutions ?? []).map((s, i) => ({ key: `s${i}`, ...s }));
+
+  const services = cms?.services?.length
+    ? cms.services.map((s) => ({
+        key: s._id,
+        slug: s.slug,
+        title: s.title,
+        icon: s.icon,
+        summary: s.summary,
+      }))
+    : (base?.serviceSlugs ?? []).flatMap((slug) => {
+        const match = findServiceBySlug(slug);
+        return match
+          ? [
+              {
+                key: slug,
+                slug,
+                title: match.service.title,
+                summary: match.service.summary,
+              },
+            ]
+          : [];
+      });
+
+  return {
+    name: cms?.name ?? base!.name,
+    icon: cms?.icon ?? base?.icon,
+    summary: cms?.summary || base?.summary || "",
+    segments: (cms?.segments?.length ? cms.segments : base?.segments) ?? [],
+    overview: base?.overview ?? [],
+    threats,
+    solutions,
+    services,
+    heroImage: cms?.heroImage,
+  };
+}
+
+async function getIndustry(slug: string) {
+  const { data } = await sanityFetch({ query: INDUSTRY_QUERY, params: { slug } });
+  return merge(data as Industry | null, findIndustryBySlug(slug));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const { data } = await sanityFetch({
-    query: INDUSTRY_QUERY,
-    params: { slug },
-    stega: false,
-  });
-  const ind = data as Industry | null;
+  const ind = await getIndustry(slug);
   if (!ind) return {};
   return {
     title: `${ind.name} Security`,
@@ -37,11 +122,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function IndustryPage({ params }: Props) {
   const { slug } = await params;
-  const { data } = await sanityFetch({
-    query: INDUSTRY_QUERY,
-    params: { slug },
-  });
-  const ind = data as Industry | null;
+  const ind = await getIndustry(slug);
   if (!ind) notFound();
 
   return (
@@ -56,13 +137,21 @@ export default async function IndustryPage({ params }: Props) {
               ← All industries
             </Link>
 
-            <div className="mt-6 flex items-center gap-3">
+            <div className="mt-6 flex flex-wrap items-center gap-3">
               {ind.icon && (
                 <span className="sfc-card__icon" aria-hidden>
                   {ind.icon}
                 </span>
               )}
-              <Badge>Industry</Badge>
+              {ind.segments.length ? (
+                ind.segments.map((seg) => (
+                  <Badge key={seg}>
+                    {SEGMENT_LABELS[seg as keyof typeof SEGMENT_LABELS] ?? seg}
+                  </Badge>
+                ))
+              ) : (
+                <Badge>Industry</Badge>
+              )}
             </div>
 
             <h1 className="mt-4 text-4xl font-bold sm:text-5xl">
@@ -82,6 +171,14 @@ export default async function IndustryPage({ params }: Props) {
                 />
               </div>
             )}
+
+            {ind.overview.length > 0 && (
+              <div className="mt-8 space-y-4 text-lg leading-relaxed text-n-700">
+                {ind.overview.map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
+              </div>
+            )}
           </div>
         </Container>
       </section>
@@ -90,12 +187,12 @@ export default async function IndustryPage({ params }: Props) {
       <section className="sfc-section pt-0">
         <Container>
           <div className="mx-auto grid max-w-4xl gap-10 md:grid-cols-2">
-            {ind.threats?.length ? (
+            {ind.threats.length ? (
               <div>
                 <h2 className="mb-5 text-2xl font-bold">Threats &amp; risks</h2>
                 <ul className="space-y-4">
                   {ind.threats.map((t) => (
-                    <li key={t._key}>
+                    <li key={t.key}>
                       <Card>
                         <h3 className="font-semibold">{t.title}</h3>
                         {t.description && (
@@ -108,12 +205,12 @@ export default async function IndustryPage({ params }: Props) {
               </div>
             ) : null}
 
-            {ind.solutions?.length ? (
+            {ind.solutions.length ? (
               <div>
                 <h2 className="mb-5 text-2xl font-bold">How we solve it</h2>
                 <ul className="space-y-4">
                   {ind.solutions.map((s) => (
-                    <li key={s._key}>
+                    <li key={s.key}>
                       <Card>
                         <div className="flex items-start gap-3">
                           <span aria-hidden className="mt-0.5 text-brand">
@@ -135,12 +232,14 @@ export default async function IndustryPage({ params }: Props) {
           </div>
 
           {/* Related services */}
-          {ind.services?.length ? (
+          {ind.services.length ? (
             <div className="mx-auto mt-14 max-w-4xl">
-              <h2 className="mb-6 text-2xl font-bold">Services for {ind.name}</h2>
+              <h2 className="mb-6 text-2xl font-bold">
+                Services for {ind.name}
+              </h2>
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {ind.services.map((s) => (
-                  <Link key={s._id} href={`/services/${s.slug}`}>
+                  <Link key={s.key} href={`/services/${s.slug}`}>
                     <Card interactive className="h-full">
                       <CardIcon>{s.icon ?? "🛡️"}</CardIcon>
                       <h3 className="mt-4 text-lg font-semibold">{s.title}</h3>

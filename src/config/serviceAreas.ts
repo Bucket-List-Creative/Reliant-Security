@@ -293,3 +293,17 @@ export const SERVICE_LOCATIONS: ServiceLocation[] = RAW_LOCATIONS.map((p) => ({
 export const SERVICE_REGIONS: ServiceRegion[] = Array.from(
   new Set(SERVICE_LOCATIONS.map((l) => l.region)),
 ).sort((a, b) => a.localeCompare(b)) as ServiceRegion[];
+
+/**
+ * Reliant's home location. The home-page map shows a clean service-area
+ * outline with this single pin, rather than a pin on every community — the
+ * dense pin cluster read as noise. The full searchable, per-community map is
+ * still used on the Contact page.
+ */
+export const HOME_BASE: ServiceLocation = {
+  name: "O'Fallon",
+  lat: 38.8106,
+  lng: -90.6998,
+  region: "St. Charles County",
+  featured: true,
+};

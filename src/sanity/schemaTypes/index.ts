@@ -9,7 +9,7 @@ import { category } from "./documents/category";
 import { post } from "./documents/post";
 import { service } from "./documents/service";
 import { industry } from "./documents/industry";
-import { caseStudy } from "./documents/caseStudy";
+import { project } from "./documents/project";
 import { plan } from "./documents/plan";
 import { testimonial } from "./documents/testimonial";
 import { partner } from "./documents/partner";
@@ -24,7 +24,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     // Documents
     service,
     industry,
-    caseStudy,
+    project,
     plan,
     testimonial,
     partner,

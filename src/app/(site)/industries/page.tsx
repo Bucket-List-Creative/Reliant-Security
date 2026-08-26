@@ -2,89 +2,47 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { sanityFetch } from "@/sanity/lib/live";
 import { INDUSTRIES_QUERY, SITE_SETTINGS_QUERY } from "@/sanity/lib/queries";
-import type {
-  IndustryListItem,
-  IndustrySegment,
-  SiteSettings,
-} from "@/sanity/lib/types";
+import type { IndustryListItem, SiteSettings } from "@/sanity/lib/types";
 import { Container } from "@/components/ui/Container";
 import { Badge } from "@/components/ui/Badge";
 import { IndustryCard } from "@/components/sections/IndustryCard";
 import { CtaBanner } from "@/components/sections/CtaBanner";
+import {
+  INDUSTRIES,
+  SEGMENT_LABELS,
+  type IndustrySegment,
+} from "@/content/industries";
 
 export const metadata: Metadata = {
   title: "Industries",
   description:
-    "Commercial and residential security tailored to the threats facing retail, warehousing, healthcare, property management, and homes.",
+    "Security and low-voltage systems for residential, custom homes, multi-family, commercial, industrial, and government facilities — from single-family alarms to Federal and DoD projects.",
 };
 
-// Shown until real industries exist in the Studio.
-const FALLBACK: IndustryListItem[] = [
-  {
-    _id: "in1",
-    slug: "retail",
-    icon: "🏪",
-    name: "Retail",
-    summary:
-      "Deter theft, protect staff, and monitor multiple storefronts from one place.",
-    segment: "commercial",
-  },
-  {
-    _id: "in2",
-    slug: "warehousing",
-    icon: "📦",
-    name: "Warehousing & Logistics",
-    summary:
-      "Control access, secure inventory, and keep high-traffic facilities safe around the clock.",
-    segment: "commercial",
-  },
-  {
-    _id: "in3",
-    slug: "healthcare",
-    icon: "🏥",
-    name: "Healthcare",
-    summary:
-      "Restrict sensitive areas and stay compliant with monitored, auditable access.",
-    segment: "commercial",
-  },
-  {
-    _id: "in4",
-    slug: "property-management",
-    icon: "🏢",
-    name: "Property Management",
-    summary:
-      "Protect tenants and common areas with smart access control and surveillance.",
-    segment: "both",
-  },
-  {
-    _id: "in5",
-    slug: "single-family-homes",
-    icon: "🏡",
-    name: "Single-Family Homes",
-    summary:
-      "Alarms, cameras, and smart locks that keep your household safe day and night.",
-    segment: "residential",
-  },
-  {
-    _id: "in6",
-    slug: "apartments-condos",
-    icon: "🏘️",
-    name: "Apartments & Condos",
-    summary:
-      "Right-sized protection for renters and owners in multi-unit buildings.",
-    segment: "residential",
-  },
-];
+/** Taxonomy defaults, shown until matching `industry` documents exist. */
+const TAXONOMY_ITEMS: IndustryListItem[] = INDUSTRIES.map((i) => ({
+  _id: `taxonomy-${i.slug}`,
+  slug: i.slug,
+  name: i.name,
+  icon: i.icon,
+  summary: i.summary,
+  segments: i.segments,
+  featured: i.featured ? "featured" : "standard",
+}));
 
 const FILTERS: { label: string; value: "" | IndustrySegment }[] = [
   { label: "All", value: "" },
-  { label: "Commercial", value: "commercial" },
-  { label: "Residential", value: "residential" },
+  { label: SEGMENT_LABELS.residential, value: "residential" },
+  { label: SEGMENT_LABELS.commercial, value: "commercial" },
+  { label: SEGMENT_LABELS.industrial, value: "industrial" },
+  { label: SEGMENT_LABELS.government, value: "government" },
 ];
 
+const VALID_SEGMENTS = new Set<string>(Object.keys(SEGMENT_LABELS));
+
 function matchesSegment(item: IndustryListItem, seg: string) {
-  if (seg !== "commercial" && seg !== "residential") return true;
-  return item.segment === seg || item.segment === "both";
+  if (!VALID_SEGMENTS.has(seg)) return true;
+  return item.segments?.includes(seg as IndustrySegment) ?? false;
 }
 
 type Props = { searchParams: Promise<{ segment?: string }> };
@@ -96,24 +54,20 @@ export default async function IndustriesPage({ searchParams }: Props) {
     sanityFetch({ query: SITE_SETTINGS_QUERY }),
   ]);
 
-  const all = (industries as IndustryListItem[])?.length
-    ? (industries as IndustryListItem[])
-    : FALLBACK;
+  const cms = industries as IndustryListItem[] | null;
+  const all = cms?.length ? cms : TAXONOMY_ITEMS;
   const items = all.filter((i) => matchesSegment(i, segment));
   const phone = (settings as SiteSettings | null)?.phone;
 
-  const activeLabel =
-    segment === "commercial"
-      ? "Commercial"
-      : segment === "residential"
-        ? "Residential"
-        : "";
+  const activeLabel = VALID_SEGMENTS.has(segment)
+    ? SEGMENT_LABELS[segment as IndustrySegment]
+    : "";
 
   return (
     <>
       <section className="sfc-section pt-12">
         <Container>
-          <div className="max-w-2xl">
+          <div className="max-w-3xl">
             <Badge className="mb-5">Industries</Badge>
             <h1 className="text-4xl font-bold sm:text-5xl">
               {activeLabel
@@ -121,8 +75,12 @@ export default async function IndustriesPage({ searchParams }: Props) {
                 : "Security built around your industry"}
             </h1>
             <p className="mt-5 text-lg text-n-700">
-              Every sector faces different risks. Explore the threats we see in
-              your industry — and exactly how Reliant addresses them.
+              Reliant works across the full range — a single-family alarm
+              system, a custom home built from the studs out, an apartment
+              community, an office building, a manufacturing plant, or a
+              Federal, State, Municipal, or DoD facility. Every sector faces
+              different risks; explore the ones we see in yours and exactly how
+              we address them.
             </p>
           </div>
 
@@ -133,7 +91,9 @@ export default async function IndustriesPage({ searchParams }: Props) {
               return (
                 <Link
                   key={f.label}
-                  href={f.value ? `/industries?segment=${f.value}` : "/industries"}
+                  href={
+                    f.value ? `/industries?segment=${f.value}` : "/industries"
+                  }
                   className={["sfc-tab", isActive && "is-active"]
                     .filter(Boolean)
                     .join(" ")}

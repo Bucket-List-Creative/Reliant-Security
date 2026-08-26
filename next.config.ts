@@ -34,6 +34,22 @@ const nextConfig: NextConfig = {
       fullUrl: true,
     },
   },
+  // The "Case studies" section was renamed to "Projects". Permanently redirect
+  // the old paths so any existing links and bookmarks keep working.
+  async redirects() {
+    return [
+      {
+        source: "/case-studies",
+        destination: "/projects",
+        permanent: true,
+      },
+      {
+        source: "/case-studies/:slug",
+        destination: "/projects/:slug",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

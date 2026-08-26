@@ -11,28 +11,38 @@ import type { Plan } from "@/sanity/lib/types";
 const FALLBACK: Plan[] = [
   {
     _id: "p1",
-    slug: "essential",
-    name: "Essential",
-    price: 29,
+    slug: "core-protection",
+    name: "Core Protection",
+    price: 49.99,
     period: "/mo",
-    description: "Core protection for apartments and small homes.",
-    features: ["Alarm system", "2 cameras", "Mobile app", "Email alerts"],
+    description:
+      "Monitored alarm and life-safety protection for homes and small businesses.",
+    features: [
+      "Alarm system",
+      "24/7 professional monitoring",
+      "Remote app access",
+      "Smart device control",
+      "24/7 smoke detection",
+      "24/7 carbon monoxide detection",
+      "Service plan",
+    ],
     featured: "standard",
     ctaLabel: "Get started",
   },
   {
     _id: "p2",
-    slug: "protect",
-    name: "Protect",
-    price: 59,
+    slug: "pro-protection",
+    name: "Pro Protection",
+    price: 59.99,
     period: "/mo",
-    description: "24/7 monitored security for the whole home.",
+    description: "Security + Video. Complete Protection.",
     features: [
-      "Everything in Essential",
-      "Pro monitoring",
-      "5 cameras",
-      "Rapid dispatch",
+      "Everything in Core Protection",
+      "Doorbell camera",
+      "Wi-Fi cameras",
+      "Active deterrence",
       "Cloud recording",
+      "24/7 on-device recording",
     ],
     featured: "featured",
     ctaLabel: "Get started",
@@ -41,26 +51,39 @@ const FALLBACK: Plan[] = [
     _id: "p3",
     slug: "business",
     name: "Business",
-    description: "Multi-site access control and surveillance.",
+    description:
+      "Custom-designed systems for commercial, industrial, and government facilities.",
     features: [
-      "Everything in Protect",
-      "Access control",
-      "Unlimited cameras",
+      "Everything in Pro Protection",
+      "Access control & credentialing",
+      "Unlimited commercial-grade cameras",
+      "Structured cabling & fiber",
+      "NDAA/TAA-compliant equipment available",
       "Dedicated account manager",
     ],
     featured: "standard",
-    ctaLabel: "Talk to sales",
+    ctaLabel: "Request a design",
   },
 ];
 
 // Annual billing applies a 2-month discount (pay for 10).
 const ANNUAL_FACTOR = 10 / 12;
 
+/**
+ * Format a monthly figure as currency. Plans are priced with cents
+ * ($49.99), so rounding to whole dollars would misstate the price —
+ * show cents whenever the amount isn't a round dollar.
+ */
+function formatPrice(amount: number) {
+  const hasCents = Math.round(amount * 100) % 100 !== 0;
+  return `$${amount.toFixed(hasCents ? 2 : 0)}`;
+}
+
 function priceLabel(plan: Plan, annual: boolean) {
   if (typeof plan.price !== "number") return { amount: "Custom", per: "" };
   const monthly = annual ? plan.price * ANNUAL_FACTOR : plan.price;
   return {
-    amount: `$${Math.round(monthly)}`,
+    amount: formatPrice(monthly),
     per: plan.period ?? "/mo",
   };
 }

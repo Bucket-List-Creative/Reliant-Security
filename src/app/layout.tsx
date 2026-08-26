@@ -5,11 +5,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Reliant Security — Premium home & business security",
+    default: "Reliant Security — Security & low-voltage integration",
     template: "%s · Reliant Security",
   },
   description:
-    "Reliant Security designs, installs, and monitors premium home and business security systems with 24/7 rapid response.",
+    "Locally owned security and low-voltage integrator serving homes, custom homes, multi-family, commercial, industrial, and government facilities — video surveillance, access control, structured cabling and fiber, audio/video, and 24/7 professional monitoring.",
 };
 
 export default function RootLayout({

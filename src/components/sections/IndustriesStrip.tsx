@@ -3,47 +3,31 @@ import { IconArrowRight } from "@tabler/icons-react";
 import { Container } from "@/components/ui/Container";
 import { IndustryCard } from "@/components/sections/IndustryCard";
 import type { IndustryListItem } from "@/sanity/lib/types";
+import { INDUSTRIES } from "@/content/industries";
 
-const FALLBACK: IndustryListItem[] = [
-  {
-    _id: "in1",
-    slug: "retail",
-    icon: "🏪",
-    name: "Retail",
-    summary:
-      "Deter theft, protect staff, and monitor multiple storefronts from one place.",
-  },
-  {
-    _id: "in2",
-    slug: "warehousing",
-    icon: "📦",
-    name: "Warehousing & Logistics",
-    summary:
-      "Control access, secure inventory, and keep high-traffic facilities safe around the clock.",
-  },
-  {
-    _id: "in3",
-    slug: "healthcare",
-    icon: "🏥",
-    name: "Healthcare",
-    summary:
-      "Restrict sensitive areas and stay compliant with monitored, auditable access.",
-  },
-  {
-    _id: "in4",
-    slug: "property-management",
-    icon: "🏢",
-    name: "Property Management",
-    summary:
-      "Protect tenants and common areas with smart access control and surveillance.",
-  },
-];
+/**
+ * Defaults come from the shared taxonomy, featured entries first, so the home
+ * page strip spans residential through government rather than reading as a
+ * commercial-only or residential-only list.
+ */
+const FALLBACK: IndustryListItem[] = [...INDUSTRIES]
+  .sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)))
+  .map((i) => ({
+    _id: `taxonomy-${i.slug}`,
+    slug: i.slug,
+    icon: i.icon,
+    name: i.name,
+    summary: i.summary,
+    segments: i.segments,
+  }));
 
 export function IndustriesStrip({
   industries,
   heading = "Industries we serve",
-  subheading = "Security tuned to the threats your sector actually faces.",
-  max = 4,
+  subheading = "From a single home to a manufacturing plant or a government facility — security tuned to the threats your sector actually faces.",
+  // Two full rows on desktop, so the range on show spans residential through
+  // government rather than stopping at the first four commercial sectors.
+  max = 8,
 }: {
   industries?: IndustryListItem[];
   heading?: string;

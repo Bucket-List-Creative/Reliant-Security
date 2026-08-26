@@ -53,19 +53,22 @@ export const industry = defineType({
       validation: (rule) => rule.required().max(240),
     }),
     defineField({
-      name: "segment",
-      title: "Segment",
-      type: "string",
-      description: "Is this a commercial or residential industry?",
+      name: "segments",
+      title: "Segments",
+      type: "array",
+      description:
+        "Which markets does this industry belong to? Several may apply — multi-family is both residential and commercial, for example.",
+      of: [defineArrayMember({ type: "string" })],
       options: {
         list: [
-          { title: "Commercial", value: "commercial" },
           { title: "Residential", value: "residential" },
-          { title: "Both", value: "both" },
+          { title: "Commercial", value: "commercial" },
+          { title: "Industrial", value: "industrial" },
+          { title: "Government", value: "government" },
         ],
-        layout: "radio",
       },
-      initialValue: "commercial",
+      validation: (rule) => rule.min(1),
+      initialValue: ["commercial"],
     }),
     defineField({
       name: "threats",

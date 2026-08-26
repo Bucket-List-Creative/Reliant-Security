@@ -6,9 +6,9 @@ import type { SiteSettings } from "@/sanity/lib/types";
 const SITEMAP = [
   { href: "/services", label: "Services" },
   { href: "/industries", label: "Industries" },
-  { href: "/case-studies", label: "Case Studies" },
+  { href: "/projects", label: "Projects" },
   { href: "/pricing", label: "Pricing" },
-  { href: "/blog", label: "Learn" },
+  { href: "/blog", label: "Resources" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
@@ -17,7 +17,7 @@ export function Footer({ settings }: { settings?: SiteSettings | null }) {
   const title = settings?.title ?? "Reliant Security";
   const tagline =
     settings?.tagline ??
-    "Premium home and business security with 24/7 rapid response.";
+    "Locally owned security and low-voltage integration — residential, commercial, industrial, and government — backed by 24/7 professional monitoring.";
 
   return (
     <footer className="mt-8">

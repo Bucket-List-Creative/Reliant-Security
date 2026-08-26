@@ -10,7 +10,7 @@ import { FaqAccordion } from "@/components/sections/FaqAccordion";
 export const metadata: Metadata = {
   title: "Pricing",
   description:
-    "Simple, flexible monitoring plans for homes and businesses. No long contracts required.",
+    "Straightforward professional monitoring plans for homes and small businesses, plus custom-designed systems for commercial, industrial, and government facilities.",
 };
 
 export default async function PricingPage() {
@@ -29,10 +29,20 @@ export default async function PricingPage() {
               Plans that scale with your peace of mind
             </h1>
             <p className="mt-5 text-lg text-n-700">
-              Transparent monthly pricing. Cancel anytime — no long contracts.
+              Transparent monthly pricing on professionally monitored plans —
+              with custom design and quoting for larger commercial, industrial,
+              and government systems.
             </p>
           </div>
           <PricingTable plans={plans as Plan[]} />
+
+          <p className="mx-auto mt-10 max-w-2xl text-center text-sm text-n-500">
+            Monitored plans typically begin with a 36-month monitoring
+            agreement. Month-to-month options are available in certain
+            situations — ask us and we&apos;ll walk you through what fits.
+            Equipment, service plans, and package inclusions are confirmed in
+            writing before installation.
+          </p>
         </Container>
       </section>
 

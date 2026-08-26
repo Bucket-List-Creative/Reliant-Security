@@ -2,7 +2,8 @@ import type { SiteSettings } from "./types";
 
 const DEFAULT_SITE_SETTINGS: SiteSettings = {
   title: "Reliant Security",
-  tagline: "Premium home and business security with 24/7 rapid response.",
+  tagline:
+    "Locally owned security and low-voltage integration — residential, commercial, industrial, and government — backed by 24/7 professional monitoring.",
 };
 
 export function fallbackSanityData(query: unknown) {

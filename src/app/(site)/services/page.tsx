@@ -172,9 +172,11 @@ export default async function ServicesPage() {
                 Protection for every corner of your world
               </h1>
               <p className="mt-5 text-lg text-n-700">
-                From a single smart lock to a fully monitored multi-site system,
-                we design, install, and support security that fits — backed by
-                24/7 monitoring and a local team that answers the phone.
+                From a single smart lock to surveillance, access control, and
+                fiber across an industrial campus, we design, install, and
+                support security and low-voltage systems that fit — backed by
+                24/7 professional monitoring and a local team that answers the
+                phone.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Button href="/contact" variant="primary">

@@ -4,29 +4,43 @@ import { Card } from "@/components/ui/Card";
 import { SanityImage } from "@/components/ui/SanityImage";
 import type { Testimonial } from "@/sanity/lib/types";
 
+/**
+ * ⚠️ PLACEHOLDER TESTIMONIALS — DO NOT LAUNCH WITH THESE.
+ *
+ * None of these are real Reliant customers. They exist only so the section
+ * has shape during design review. Replace them with genuine Google and Angi
+ * reviews (as `testimonial` documents in Sanity) before the site goes live —
+ * publishing invented customer quotes is both misleading and, for reviews,
+ * legally risky.
+ *
+ * The previous version attributed quotes to named people in Austin and
+ * Denver, which is doubly wrong for a St. Louis-area company. Names and
+ * locations have been stripped back so nothing here reads as a real,
+ * verifiable reference.
+ */
 const FALLBACK: Testimonial[] = [
   {
     _id: "t1",
     quote:
       "The install was spotless and the monitoring team caught an issue before we even noticed. Genuinely reassuring.",
-    authorName: "Dana Whitfield",
-    authorRole: "Homeowner, Austin",
+    authorName: "Sample review",
+    authorRole: "Residential customer — replace with a real Google review",
     rating: 5,
   },
   {
     _id: "t2",
     quote:
-      "We secured three retail locations in a week. Access control and cameras all run from one dashboard now.",
-    authorName: "Marcus Lee",
-    authorRole: "Operations Director, Northgate Retail",
+      "They handled the cameras, the access control, and all the cabling. One team, one point of contact, no finger-pointing.",
+    authorName: "Sample review",
+    authorRole: "Commercial customer — replace with a real Google review",
     rating: 5,
   },
   {
     _id: "t3",
     quote:
-      "Response time is exactly as promised. It's the first security company that actually feels premium.",
-    authorName: "Priya Nair",
-    authorRole: "Homeowner, Denver",
+      "They understood what a plant environment does to equipment and specified accordingly. It's held up.",
+    authorName: "Sample review",
+    authorRole: "Industrial customer — replace with a real Angi review",
     rating: 5,
   },
 ];

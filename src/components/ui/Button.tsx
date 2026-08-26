@@ -1,14 +1,15 @@
 import Link from "next/link";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
-type Variant = "primary" | "secondary" | "outline" | "ghost" | "emergency";
+/** `cta` is the high-contrast button used on the dark navbar pill. */
+type Variant = "primary" | "secondary" | "outline" | "ghost" | "cta";
 
 const variantClass: Record<Variant, string> = {
   primary: "sfc-btn--primary",
   secondary: "sfc-btn--secondary",
   outline: "sfc-btn--outline",
   ghost: "sfc-btn--ghost",
-  emergency: "sfc-btn--emergency",
+  cta: "sfc-btn--cta",
 };
 
 type CommonProps = {

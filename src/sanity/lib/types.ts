@@ -147,27 +147,30 @@ export type Post = PostListItem & {
   body?: PortableTextBlock[];
 };
 
-export type CaseStudyResult = {
+export type ProjectResult = {
   _key: string;
   value: string;
   label: string;
 };
 
-export type CaseStudyListItem = {
+export type ProjectListItem = {
   _id: string;
   title: string;
   slug: string;
   client?: string;
   industry?: string;
   summary: string;
+  segments?: IndustrySegment[];
   featured?: "standard" | "featured";
   publishedAt: string;
   heroImage?: SanityImage;
 };
 
-export type CaseStudy = CaseStudyListItem & {
+export type Project = ProjectListItem & {
+  /** General location only (city, state) — never a street address. */
   location?: string;
-  results?: CaseStudyResult[];
+  equipment?: string[];
+  results?: ProjectResult[];
   services?: Pick<Service, "_id" | "title" | "slug" | "icon">[];
   gallery?: (SanityImage & { _key: string })[];
   challenge?: PortableTextBlock[];
@@ -180,7 +183,11 @@ export type IndustryPoint = {
   description?: string;
 };
 
-export type IndustrySegment = "commercial" | "residential" | "both";
+export type IndustrySegment =
+  | "residential"
+  | "commercial"
+  | "industrial"
+  | "government";
 
 export type IndustryListItem = {
   _id: string;
@@ -188,7 +195,8 @@ export type IndustryListItem = {
   slug: string;
   icon?: string;
   summary: string;
-  segment?: IndustrySegment;
+  /** An industry can belong to more than one segment (e.g. multi-family). */
+  segments?: IndustrySegment[];
   featured?: "standard" | "featured";
   heroImage?: SanityImage;
 };

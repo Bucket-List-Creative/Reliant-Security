@@ -11,37 +11,37 @@ const FALLBACK: Pick<
   {
     _id: "f1",
     icon: "🛡️",
-    title: "Home Security",
+    title: "Alarm Systems",
     summary:
-      "Smart alarms, door and window sensors, and 24/7 monitoring tailored to your home.",
+      "Intrusion, smoke, and carbon-monoxide detection for homes and businesses, backed by 24/7 professional monitoring.",
   },
   {
     _id: "f2",
     icon: "📹",
     title: "Video Surveillance",
     summary:
-      "HD cameras with intelligent motion detection and cloud recording you can review anywhere.",
+      "Hardwired and wireless cameras — from a doorbell camera to site-wide industrial coverage — with recording you can review anywhere.",
   },
   {
     _id: "f3",
     icon: "🔐",
     title: "Access Control",
     summary:
-      "Keyless entry, smart locks, and permission management for homes and businesses.",
+      "Keyless entry, mobile credentials, and role-based permissions with a full audit trail on every door.",
   },
   {
     _id: "f4",
-    icon: "🚨",
-    title: "Rapid Response",
+    icon: "🔌",
+    title: "Structured Cabling & Fiber",
     summary:
-      "Round-the-clock monitoring with fast dispatch when every second counts.",
+      "Cat6/Cat6A, fiber, racks, and pathways — certified, labeled, and documented network infrastructure.",
   },
 ];
 
 export function ServicesGrid({
   services,
   heading = "What we protect",
-  subheading = "End-to-end security, designed around how you actually live and work.",
+  subheading = "End-to-end security and low-voltage systems, designed around how your home or facility actually operates.",
   showLinks = true,
 }: {
   services?: Service[];

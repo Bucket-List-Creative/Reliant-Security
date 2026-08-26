@@ -3,12 +3,23 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { IconChevronDown } from "@tabler/icons-react";
+import { IconChevronDown, IconMenu2, IconX } from "@tabler/icons-react";
 import { Button } from "@/components/ui/Button";
 import { ServiceIcon, type ServiceIconKey } from "@/components/ui/ServiceIcon";
 import { SERVICE_CATEGORIES } from "@/content/services";
 
-type NavLeaf = { label: string; href: string; desc?: string; icon?: string };
+/**
+ * Dropdown entries use the shared line-icon set (Tabler, MIT-licensed) rather
+ * than emoji. Emoji render differently on every OS, don't inherit `currentColor`
+ * so they can't be tinted to the navbar's white-on-green, and sit visually
+ * heavier than the Services mega-menu icons alongside them.
+ */
+type NavLeaf = {
+  label: string;
+  href: string;
+  desc?: string;
+  iconKey?: ServiceIconKey;
+};
 type NavColumn = {
   title: string;
   href: string;
@@ -44,18 +55,20 @@ const NAV: NavItem[] = [
     label: "Industries",
     href: "/industries",
     children: [
-      { label: "Commercial", href: "/industries?segment=commercial", icon: "🏢", desc: "Retail, warehousing, healthcare…" },
-      { label: "Residential", href: "/industries?segment=residential", icon: "🏡", desc: "Homes, apartments & condos" },
-      { label: "All industries", href: "/industries", icon: "🗂️", desc: "Browse every sector" },
+      { label: "Residential", href: "/industries?segment=residential", iconKey: "home", desc: "Homes, custom homes & multi-family" },
+      { label: "Commercial", href: "/industries?segment=commercial", iconKey: "building", desc: "Offices, retail, healthcare & more" },
+      { label: "Industrial", href: "/industries?segment=industrial", iconKey: "factory", desc: "Plants, manufacturing & logistics" },
+      { label: "Government", href: "/industries?segment=government", iconKey: "government", desc: "Federal, State, Municipal & DoD" },
+      { label: "All industries", href: "/industries", iconKey: "grid", desc: "Browse every sector" },
     ],
   },
   {
     label: "About",
     href: "/about",
     children: [
-      { label: "About Us", href: "/about", icon: "👥", desc: "Our mission, team & partners" },
-      { label: "Case Studies", href: "/case-studies", icon: "🗂️", desc: "Projects we've delivered" },
-      { label: "Learn & Guides", href: "/blog", icon: "📚", desc: "Buyer's guides & tips" },
+      { label: "About Us", href: "/about", iconKey: "team", desc: "Our story, team & partners" },
+      { label: "Projects", href: "/projects", iconKey: "projects", desc: "Real installations we've delivered" },
+      { label: "Resources", href: "/blog", iconKey: "resources", desc: "Guides, insights & industry news" },
     ],
   },
   { label: "Pricing", href: "/pricing" },
@@ -162,23 +175,27 @@ export function Navbar({
             <div className="hidden md:block">
               <Button
                 href={emergencyPhone ? `tel:${emergencyPhone}` : "/contact"}
-                variant="emergency"
+                variant="cta"
                 onMouseEnter={() => setActive(null)}
               >
-                {emergencyPhone ? `Call ${emergencyPhone}` : "24/7 Emergency"}
+                {emergencyPhone ? `Call ${emergencyPhone}` : "Get a Free Quote"}
               </Button>
             </div>
 
             {/* Mobile toggle */}
             <button
               type="button"
-              className="rounded-[var(--radius-sm)] px-3 py-2 text-2xl leading-none text-white md:hidden"
+              className="grid size-11 place-items-center rounded-[var(--radius-sm)] text-white transition-colors hover:bg-white/10 md:hidden"
               aria-expanded={open}
               aria-controls="mobile-menu"
-              aria-label="Toggle menu"
+              aria-label={open ? "Close menu" : "Open menu"}
               onClick={() => setOpen((v) => !v)}
             >
-              {open ? "✕" : "☰"}
+              {open ? (
+                <IconX size={24} stroke={2} aria-hidden />
+              ) : (
+                <IconMenu2 size={24} stroke={2} aria-hidden />
+              )}
             </button>
           </div>
 
@@ -248,12 +265,12 @@ export function Navbar({
                           href={c.href}
                           className="flex min-w-[220px] flex-1 items-start gap-3 rounded-[var(--radius-md)] bg-white/10 p-4 transition-colors hover:bg-white/20"
                         >
-                          {c.icon && (
+                          {c.iconKey && (
                             <span
                               aria-hidden
-                              className="grid size-10 flex-none place-items-center rounded-[var(--radius-sm)] bg-white/15 text-lg"
+                              className="grid size-10 flex-none place-items-center rounded-[var(--radius-sm)] bg-white/15 text-white"
                             >
-                              {c.icon}
+                              <ServiceIcon name={c.iconKey} size={20} />
                             </span>
                           )}
                           <span>
@@ -347,10 +364,21 @@ export function Navbar({
                                 <li key={c.label}>
                                   <Link
                                     href={c.href}
-                                    className="block rounded-[var(--radius-sm)] px-4 py-2 text-n-700"
+                                    className="flex items-center gap-2.5 rounded-[var(--radius-sm)] px-4 py-2 text-n-700"
                                     onClick={() => setOpen(false)}
                                   >
-                                    {c.icon} {c.label}
+                                    {c.iconKey && (
+                                      <span
+                                        aria-hidden
+                                        className="flex-none text-brand-press"
+                                      >
+                                        <ServiceIcon
+                                          name={c.iconKey}
+                                          size={18}
+                                        />
+                                      </span>
+                                    )}
+                                    {c.label}
                                   </Link>
                                 </li>
                               ))}
@@ -372,10 +400,10 @@ export function Navbar({
               <li className="mt-2">
                 <Button
                   href={emergencyPhone ? `tel:${emergencyPhone}` : "/contact"}
-                  variant="emergency"
+                  variant="cta"
                   className="w-full"
                 >
-                  {emergencyPhone ? `Call ${emergencyPhone}` : "24/7 Emergency"}
+                  {emergencyPhone ? `Call ${emergencyPhone}` : "Get a Free Quote"}
                 </Button>
               </li>
             </ul>
