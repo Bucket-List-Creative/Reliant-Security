@@ -24,7 +24,7 @@ const TAXONOMY_ITEMS: IndustryListItem[] = INDUSTRIES.map((i) => ({
   _id: `taxonomy-${i.slug}`,
   slug: i.slug,
   name: i.name,
-  icon: i.icon,
+  iconKey: i.iconKey,
   summary: i.summary,
   segments: i.segments,
   featured: i.featured ? "featured" : "standard",

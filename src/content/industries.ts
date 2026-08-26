@@ -1,3 +1,5 @@
+import type { ServiceIconKey } from "@/components/ui/ServiceIcon";
+
 /**
  * Industry taxonomy — the single source of truth for the Industries index,
  * the /industries/[slug] detail pages, and the navbar dropdown.
@@ -23,7 +25,8 @@ export type IndustryPoint = { title: string; description: string };
 export type TaxonomyIndustry = {
   slug: string;
   name: string;
-  icon: string;
+  /** Line-icon key from the shared set — never an emoji. */
+  iconKey: ServiceIconKey;
   /** Card/section description and default meta description. */
   summary: string;
   /** An industry can legitimately belong to more than one segment. */
@@ -51,7 +54,7 @@ export const INDUSTRIES: TaxonomyIndustry[] = [
   {
     slug: "residential",
     name: "Residential",
-    icon: "🏡",
+    iconKey: "home",
     segments: ["residential"],
     summary:
       "Monitored alarms, cameras, smart locks, and automation that keep a household safe day and night.",
@@ -104,7 +107,7 @@ export const INDUSTRIES: TaxonomyIndustry[] = [
   {
     slug: "custom-homes",
     name: "Custom Homes",
-    icon: "🏗️",
+    iconKey: "custom-home",
     segments: ["residential"],
     summary:
       "Fully integrated security, surveillance, networking, structured cabling, audio/video, and automation for high-end and new-construction homes.",
@@ -157,7 +160,7 @@ export const INDUSTRIES: TaxonomyIndustry[] = [
   {
     slug: "multi-family",
     name: "Multi-Family",
-    icon: "🏘️",
+    iconKey: "multi-family",
     segments: ["residential", "commercial"],
     summary:
       "Access control, intercoms, common-area surveillance, and property-management tools for apartments, condos, and multi-family communities.",
@@ -211,7 +214,7 @@ export const INDUSTRIES: TaxonomyIndustry[] = [
   {
     slug: "commercial-office",
     name: "Commercial & Office",
-    icon: "🏢",
+    iconKey: "building",
     segments: ["commercial"],
     summary:
       "Integrated alarm, surveillance, access control, and network infrastructure for offices, professional buildings, and general commercial facilities.",
@@ -264,7 +267,7 @@ export const INDUSTRIES: TaxonomyIndustry[] = [
   {
     slug: "industrial-manufacturing",
     name: "Industrial & Manufacturing",
-    icon: "🏭",
+    iconKey: "factory",
     segments: ["industrial", "commercial"],
     summary:
       "Large-site surveillance, perimeter protection, access control, and structured cabling built for plants, production floors, and heavy industrial facilities.",
@@ -327,7 +330,7 @@ export const INDUSTRIES: TaxonomyIndustry[] = [
   {
     slug: "government-public-sector",
     name: "Government & Public Sector",
-    icon: "🏛️",
+    iconKey: "government",
     segments: ["government", "commercial"],
     summary:
       "Surveillance, access control, structured cabling, and fiber infrastructure for Federal, State, Municipal, and Department of Defense projects — with NDAA/TAA-compliant equipment when required.",
@@ -390,7 +393,7 @@ export const INDUSTRIES: TaxonomyIndustry[] = [
   {
     slug: "retail",
     name: "Retail",
-    icon: "🏪",
+    iconKey: "store",
     segments: ["commercial"],
     summary:
       "Deter theft, protect staff, and monitor multiple storefronts from a single dashboard.",
@@ -442,7 +445,7 @@ export const INDUSTRIES: TaxonomyIndustry[] = [
   {
     slug: "warehousing-logistics",
     name: "Warehousing & Logistics",
-    icon: "📦",
+    iconKey: "warehouse",
     segments: ["commercial", "industrial"],
     summary:
       "Control access, secure inventory, and keep high-traffic distribution facilities covered around the clock.",
@@ -494,7 +497,7 @@ export const INDUSTRIES: TaxonomyIndustry[] = [
   {
     slug: "healthcare",
     name: "Healthcare",
-    icon: "🏥",
+    iconKey: "healthcare",
     segments: ["commercial"],
     summary:
       "Restrict sensitive areas and maintain monitored, auditable access across clinical facilities.",
@@ -546,7 +549,7 @@ export const INDUSTRIES: TaxonomyIndustry[] = [
   {
     slug: "property-management",
     name: "Property Management",
-    icon: "🗝️",
+    iconKey: "property",
     segments: ["commercial", "residential"],
     summary:
       "Protect tenants, common areas, and building assets across managed portfolios with centralized access and surveillance.",

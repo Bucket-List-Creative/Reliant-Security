@@ -66,7 +66,7 @@ export const service = defineType({
       title: "Icon (emoji fallback)",
       type: "string",
       description:
-        "Optional emoji fallback used only when no line icon is selected, e.g. 🛡️ or 📹",
+        "Optional emoji fallback used only when no line icon is selected, e.g. a shield or camera glyph",
       validation: (rule) => rule.max(4),
     }),
     defineField({

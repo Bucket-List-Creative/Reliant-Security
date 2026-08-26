@@ -262,8 +262,10 @@
     box-shadow: 0 2px 8px rgb(0 0 0 / 0.18);
   }
   .sfc-btn--cta:hover {
+    /* A restrained lift — the earlier, brighter hover read as glare against
+       the dark pill rather than as a state change. */
     background: var(--color-n-050);
-    box-shadow: 0 4px 14px rgb(0 0 0 / 0.24);
+    box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
   }
   .sfc-btn--cta:active,
   .sfc-btn--cta.is-pressed {
@@ -297,51 +299,87 @@
 
   /* ---- Accent cards ----
      Set `--accent` / `--accent-soft` on the card (see `.sfc-accent-*` below)
-     and the icon tile, top rule, and hover glow all follow from it. */
+     and the surface, icon tile, and hover state all follow from it.
+
+     The card is FILLED with its accent tint rather than carrying a coloured
+     rule on a grey body — a stripe on grey still reads as a grey card. The
+     tint is lifted at the top-right by a soft wash of the accent so the fill
+     has some depth, and the icon tile is solid accent with a white glyph to
+     give each card a definite focal point. */
+  /* Alpha variants come from `--accent-rgb` rather than `color-mix()`.
+     Lightning CSS expands every color-mix into a full-opacity fallback plus an
+     @supports block — so a browser without color-mix would render the wash,
+     border, and glow at 100% opacity, i.e. a solid saturated blob. The rgb()
+     slash syntax has no such fallback path and emits about half the CSS. */
   .sfc-card--accent {
     position: relative;
     overflow: hidden;
-  }
-  .sfc-card--accent::before {
-    content: "";
-    position: absolute;
-    inset-inline: 0;
-    top: 0;
-    height: 4px;
-    background: var(--accent, var(--color-brand));
-    opacity: 0.85;
+    background:
+      radial-gradient(
+        125% 100% at 100% 0%,
+        rgb(var(--accent-rgb) / 16%),
+        transparent 62%
+      ),
+      var(--accent-soft, var(--color-surface-raised));
+    border: 1px solid rgb(var(--accent-rgb) / 20%);
+    box-shadow: 0 6px 18px rgb(var(--accent-rgb) / 12%);
+    transition:
+      box-shadow var(--dur-base) var(--ease-soft),
+      transform var(--dur-base) var(--ease-soft),
+      border-color var(--dur-base) var(--ease-soft);
   }
   .sfc-card--accent .sfc-card__icon {
-    background: var(--accent-soft, var(--color-surface));
-    color: var(--accent, var(--color-brand-press));
-    box-shadow: none;
+    background: var(--accent, var(--color-brand));
+    color: var(--color-white);
+    box-shadow: 0 6px 14px rgb(var(--accent-rgb) / 38%);
+  }
+  /* Body copy sits on a tint rather than the neutral surface, so it needs a
+     touch more weight to hold the same contrast. */
+  .sfc-card--accent p {
+    color: var(--color-n-800);
   }
   .sfc-card--interactive.sfc-card--accent:hover {
-    box-shadow: var(--shadow-soft-4);
+    transform: translateY(-3px);
+    border-color: rgb(var(--accent-rgb) / 38%);
+    box-shadow: 0 14px 30px rgb(var(--accent-rgb) / 22%);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sfc-card--interactive.sfc-card--accent:hover {
+      transform: none;
+    }
   }
 
+  /* `--accent-rgb` is the same colour as `--accent`, as a space-separated
+     triplet, so alpha variants can be derived with rgb(... / X%). Keep the two
+     in sync when changing a hue. */
   .sfc-accent-green {
     --accent: var(--color-accent-green);
+    --accent-rgb: 0 140 88;
     --accent-soft: var(--color-accent-green-soft);
   }
   .sfc-accent-blue {
     --accent: var(--color-accent-blue);
+    --accent-rgb: 29 111 208;
     --accent-soft: var(--color-accent-blue-soft);
   }
   .sfc-accent-teal {
     --accent: var(--color-accent-teal);
+    --accent-rgb: 14 143 143;
     --accent-soft: var(--color-accent-teal-soft);
   }
   .sfc-accent-amber {
     --accent: var(--color-accent-amber);
+    --accent-rgb: 168 112 10;
     --accent-soft: var(--color-accent-amber-soft);
   }
   .sfc-accent-violet {
     --accent: var(--color-accent-violet);
+    --accent-rgb: 109 85 212;
     --accent-soft: var(--color-accent-violet-soft);
   }
   .sfc-accent-rose {
     --accent: var(--color-accent-rose);
+    --accent-rgb: 194 69 106;
     --accent-soft: var(--color-accent-rose-soft);
   }
 

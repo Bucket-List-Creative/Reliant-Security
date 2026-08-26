@@ -25,11 +25,26 @@ export const industry = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
-      name: "icon",
-      title: "Icon (emoji)",
+      name: "iconKey",
+      title: "Icon",
       type: "string",
-      description: "A single emoji glyph for the industry card, e.g. 🏪 or 🏥.",
-      validation: (rule) => rule.max(4),
+      description:
+        "Line icon shown on the industry card. Emoji were removed — they render differently per OS and can't be tinted to the card's accent colour.",
+      options: {
+        list: [
+          { title: "Home / residential", value: "home" },
+          { title: "Custom home", value: "custom-home" },
+          { title: "Multi-family", value: "multi-family" },
+          { title: "Commercial building", value: "building" },
+          { title: "Industrial / factory", value: "factory" },
+          { title: "Government", value: "government" },
+          { title: "Retail store", value: "store" },
+          { title: "Warehouse", value: "warehouse" },
+          { title: "Healthcare", value: "healthcare" },
+          { title: "Property management", value: "property" },
+        ],
+      },
+      initialValue: "building",
     }),
     defineField({
       name: "heroImage",
@@ -146,9 +161,6 @@ export const industry = defineType({
     },
   ],
   preview: {
-    select: { title: "name", subtitle: "summary", icon: "icon" },
-    prepare({ title, subtitle, icon }) {
-      return { title: icon ? `${icon} ${title}` : title, subtitle };
-    },
+    select: { title: "name", subtitle: "summary" },
   },
 });

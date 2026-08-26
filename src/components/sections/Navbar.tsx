@@ -203,7 +203,7 @@ export function Navbar({
             </Link>
 
             {/* Desktop links */}
-            <ul className="hidden items-center gap-1 lg:flex">
+            <ul className="hidden items-center gap-1 min-[880px]:flex">
               {NAV.map((item) => {
                 const hasMenu = Boolean(item.children || item.columns);
                 const isOpen = active === item.label;
@@ -215,7 +215,7 @@ export function Navbar({
                     <li key={item.label}>
                       <Link
                         href={item.href}
-                        className={`${base} text-white/90 hover:bg-white/10 hover:text-white`}
+                        className={`${base} text-white/85 hover:bg-white/[0.07] hover:text-white`}
                         onMouseEnter={scheduleClose}
                         onFocus={() => openMenu(null)}
                       >
@@ -238,8 +238,8 @@ export function Navbar({
                       href={item.href}
                       className={`${base} ${
                         isOpen
-                          ? "bg-white/15 text-white"
-                          : "text-white/90 hover:bg-white/10 hover:text-white"
+                          ? "bg-white/[0.11] text-white"
+                          : "text-white/85 hover:bg-white/[0.07] hover:text-white"
                       }`}
                       aria-expanded={isOpen}
                       aria-controls={panelId}
@@ -278,7 +278,7 @@ export function Navbar({
               })}
             </ul>
 
-            <div className="hidden lg:block">
+            <div className="hidden min-[880px]:block">
               <Button
                 href={ctaHref}
                 variant="cta"
@@ -291,7 +291,7 @@ export function Navbar({
             {/* Mobile toggle */}
             <button
               type="button"
-              className="grid size-11 place-items-center rounded-[var(--radius-sm)] text-white transition-colors hover:bg-white/10 lg:hidden"
+              className="grid size-11 place-items-center rounded-[var(--radius-sm)] text-white transition-colors hover:bg-white/[0.07] min-[880px]:hidden"
               aria-expanded={open}
               aria-controls="mobile-menu"
               aria-label={open ? "Close menu" : "Open menu"}
@@ -324,7 +324,7 @@ export function Navbar({
         {open && (
           <div
             id="mobile-menu"
-            className="mt-2 max-h-[calc(100dvh-7rem)] overflow-y-auto overscroll-contain rounded-[var(--radius-lg)] bg-surface-raised p-3 lg:hidden"
+            className="mt-2 max-h-[calc(100dvh-7rem)] overflow-y-auto overscroll-contain rounded-[var(--radius-lg)] bg-surface-raised p-3 min-[880px]:hidden"
             style={{ boxShadow: "var(--shadow-soft-3)" }}
           >
             <ul className="flex flex-col gap-1">

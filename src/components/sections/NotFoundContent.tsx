@@ -1,6 +1,7 @@
 import { Container } from "@/components/ui/Container";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { ServiceIcon } from "@/components/ui/ServiceIcon";
 
 /** Branded 404 body, shared by the root and (site) not-found boundaries. */
 export function NotFoundContent() {
@@ -8,7 +9,9 @@ export function NotFoundContent() {
     <section className="sfc-section flex flex-1 items-center pt-16">
       <Container>
         <Card className="mx-auto max-w-xl text-center">
-          <div className="sfc-card__icon mx-auto text-2xl">🔍</div>
+          <div className="sfc-card__icon mx-auto">
+            <ServiceIcon name="search" size={26} />
+          </div>
           <p className="mt-6 font-mono text-sm font-semibold tracking-widest text-brand-press">
             ERROR 404
           </p>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { IconArrowRight } from "@tabler/icons-react";
 import { Card, CardIcon } from "@/components/ui/Card";
+import { ServiceIcon, isServiceIconKey } from "@/components/ui/ServiceIcon";
 import type { IndustryListItem } from "@/sanity/lib/types";
 import { SEGMENT_LABELS, type IndustrySegment } from "@/content/industries";
 
@@ -27,14 +28,16 @@ export function IndustryCard({ item }: { item: IndustryListItem }) {
         className={`sfc-card--accent ${accent} flex h-full flex-col`}
       >
         <div className="flex items-start justify-between gap-3">
-          <CardIcon>{item.icon ?? "🏢"}</CardIcon>
+          <CardIcon>
+            <ServiceIcon
+              name={isServiceIconKey(item.iconKey) ? item.iconKey : "building"}
+              size={26}
+            />
+          </CardIcon>
           {item.segments?.length ? (
             <span
-              className="rounded-[var(--radius-pill)] px-2.5 py-1 text-[0.7rem] font-bold uppercase tracking-wide"
-              style={{
-                background: "var(--accent-soft)",
-                color: "var(--accent)",
-              }}
+              className="rounded-[var(--radius-pill)] bg-white/70 px-2.5 py-1 text-[0.7rem] font-bold uppercase tracking-wide"
+              style={{ color: "var(--accent)" }}
             >
               {SEGMENT_LABELS[item.segments[0]]}
             </span>

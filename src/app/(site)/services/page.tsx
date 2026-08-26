@@ -117,11 +117,9 @@ function ServiceCard({ service }: { service: DisplayService }) {
           className="sfc-card__icon absolute -bottom-5 left-4"
           aria-hidden="true"
         >
-          {isServiceIconKey(service.iconKey) ? (
-            <ServiceIcon name={service.iconKey} size={26} />
-          ) : (
-            <span>{service.icon ?? "🛡️"}</span>
-          )}
+          {/* `iconKey` is already normalised to a valid key by
+              `resolveIconKey` when the categories are built. */}
+          <ServiceIcon name={service.iconKey} size={26} />
         </span>
       </div>
 

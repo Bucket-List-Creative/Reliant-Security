@@ -7,6 +7,7 @@ import type { Industry } from "@/sanity/lib/types";
 import { Container } from "@/components/ui/Container";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardIcon } from "@/components/ui/Card";
+import { ServiceIcon, isServiceIconKey } from "@/components/ui/ServiceIcon";
 import { SanityImage } from "@/components/ui/SanityImage";
 import { CtaBanner } from "@/components/sections/CtaBanner";
 import {
@@ -31,7 +32,7 @@ export function generateStaticParams() {
 /** Shape the page renders, whichever source it came from. */
 type DisplayIndustry = {
   name: string;
-  icon?: string;
+  iconKey?: string;
   summary: string;
   segments: string[];
   overview: string[];
@@ -94,7 +95,7 @@ function merge(
 
   return {
     name: cms?.name ?? base!.name,
-    icon: cms?.icon ?? base?.icon,
+    iconKey: cms?.iconKey ?? base?.iconKey,
     summary: cms?.summary || base?.summary || "",
     segments: (cms?.segments?.length ? cms.segments : base?.segments) ?? [],
     overview: base?.overview ?? [],
@@ -138,11 +139,12 @@ export default async function IndustryPage({ params }: Props) {
             </Link>
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              {ind.icon && (
-                <span className="sfc-card__icon" aria-hidden>
-                  {ind.icon}
-                </span>
-              )}
+              <span className="sfc-card__icon" aria-hidden>
+                <ServiceIcon
+                  name={isServiceIconKey(ind.iconKey) ? ind.iconKey : "building"}
+                  size={26}
+                />
+              </span>
               {ind.segments.length ? (
                 ind.segments.map((seg) => (
                   <Badge key={seg}>
@@ -241,7 +243,12 @@ export default async function IndustryPage({ params }: Props) {
                 {ind.services.map((s) => (
                   <Link key={s.key} href={`/services/${s.slug}`}>
                     <Card interactive className="h-full">
-                      <CardIcon>{s.icon ?? "🛡️"}</CardIcon>
+                      <CardIcon>
+                        <ServiceIcon
+                          name={isServiceIconKey(s.icon) ? s.icon : "shield-check"}
+                          size={26}
+                        />
+                      </CardIcon>
                       <h3 className="mt-4 text-lg font-semibold">{s.title}</h3>
                       {s.summary && (
                         <p className="mt-2 text-n-700">{s.summary}</p>

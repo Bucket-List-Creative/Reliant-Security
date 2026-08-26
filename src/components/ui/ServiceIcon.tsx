@@ -18,6 +18,13 @@ import {
   IconUsersGroup,
   IconBriefcase,
   IconBook2,
+  IconHomeStar,
+  IconBuildingCommunity,
+  IconBuildingStore,
+  IconBuildingWarehouse,
+  IconBuildingHospital,
+  IconBuildingEstate,
+  IconSearch,
   type Icon,
   type IconProps,
 } from "@tabler/icons-react";
@@ -49,7 +56,14 @@ export type ServiceIconKey =
   | "government"
   | "team"
   | "projects"
-  | "resources";
+  | "resources"
+  | "custom-home"
+  | "multi-family"
+  | "store"
+  | "warehouse"
+  | "healthcare"
+  | "property"
+  | "search";
 
 const ICONS: Record<ServiceIconKey, Icon> = {
   "shield-check": IconShieldCheck,
@@ -71,6 +85,13 @@ const ICONS: Record<ServiceIconKey, Icon> = {
   team: IconUsersGroup,
   projects: IconBriefcase,
   resources: IconBook2,
+  "custom-home": IconHomeStar,
+  "multi-family": IconBuildingCommunity,
+  store: IconBuildingStore,
+  warehouse: IconBuildingWarehouse,
+  healthcare: IconBuildingHospital,
+  property: IconBuildingEstate,
+  search: IconSearch,
 };
 
 export function isServiceIconKey(v: unknown): v is ServiceIconKey {

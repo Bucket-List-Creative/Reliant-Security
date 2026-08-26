@@ -193,7 +193,8 @@ export type IndustryListItem = {
   _id: string;
   name: string;
   slug: string;
-  icon?: string;
+  /** Line-icon key matching `ServiceIconKey`. */
+  iconKey?: string;
   summary: string;
   /** An industry can belong to more than one segment (e.g. multi-family). */
   segments?: IndustrySegment[];

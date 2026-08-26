@@ -14,7 +14,7 @@ import type {
 } from "@/sanity/lib/types";
 import { Container } from "@/components/ui/Container";
 import { Badge } from "@/components/ui/Badge";
-import { Card } from "@/components/ui/Card";
+import { Card, CardIcon } from "@/components/ui/Card";
 import { VideoEmbed } from "@/components/ui/VideoEmbed";
 import { ServiceIcon, type ServiceIconKey } from "@/components/ui/ServiceIcon";
 import { TrustBar } from "@/components/sections/TrustBar";
@@ -86,41 +86,62 @@ const DIFFERENTIATORS: {
   },
 ];
 
-const CUSTOMERS: { name: string; description: string; icon: string }[] = [
+/** Rotated across the differentiator cards so the grid isn't monochrome. */
+const DIFF_ACCENTS = [
+  "sfc-accent-green",
+  "sfc-accent-amber",
+  "sfc-accent-violet",
+  "sfc-accent-blue",
+  "sfc-accent-teal",
+  "sfc-accent-rose",
+];
+
+const CUSTOMERS: {
+  name: string;
+  description: string;
+  iconKey: ServiceIconKey;
+  accent: string;
+}[] = [
   {
     name: "Residential",
     description: "Alarms, cameras, smart control, and monitoring for homes.",
-    icon: "🏡",
+    iconKey: "home",
+    accent: "sfc-accent-green",
   },
   {
     name: "Custom Homes",
     description:
       "Pre-construction design, structured cabling, AV, and whole-home integration.",
-    icon: "🏗️",
+    iconKey: "custom-home",
+    accent: "sfc-accent-teal",
   },
   {
     name: "Multi-Family",
     description:
       "Access control, intercoms, and common-area surveillance for communities.",
-    icon: "🏘️",
+    iconKey: "multi-family",
+    accent: "sfc-accent-rose",
   },
   {
     name: "Commercial",
     description:
       "Offices, retail, healthcare, and warehousing across the metro and beyond.",
-    icon: "🏢",
+    iconKey: "building",
+    accent: "sfc-accent-blue",
   },
   {
     name: "Industrial",
     description:
       "Plants and manufacturing sites, including harsh-environment installations.",
-    icon: "🏭",
+    iconKey: "factory",
+    accent: "sfc-accent-amber",
   },
   {
     name: "Government & DoD",
     description:
       "Federal, State, Municipal, and Department of Defense facilities.",
-    icon: "🏛️",
+    iconKey: "government",
+    accent: "sfc-accent-violet",
   },
 ];
 
@@ -214,17 +235,16 @@ export default async function AboutPage() {
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {DIFFERENTIATORS.map((d) => (
-              <Card key={d.title} className="flex h-full flex-col">
-                <span
-                  aria-hidden
-                  className="grid size-12 flex-none place-items-center rounded-[var(--radius-md)] bg-surface text-brand-press"
-                  style={{ boxShadow: "var(--shadow-soft-in-sm)" }}
-                >
-                  <ServiceIcon name={d.iconKey} size={24} />
-                </span>
+            {DIFFERENTIATORS.map((d, i) => (
+              <Card
+                key={d.title}
+                className={`sfc-card--accent ${DIFF_ACCENTS[i % DIFF_ACCENTS.length]} flex h-full flex-col`}
+              >
+                <CardIcon>
+                  <ServiceIcon name={d.iconKey} size={26} />
+                </CardIcon>
                 <h3 className="mt-5 text-lg font-semibold">{d.title}</h3>
-                <p className="mt-2 flex-1 text-n-700">{d.description}</p>
+                <p className="mt-2 flex-1">{d.description}</p>
               </Card>
             ))}
           </div>
@@ -243,10 +263,13 @@ export default async function AboutPage() {
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {CUSTOMERS.map((c) => (
-              <Card key={c.name} className="flex h-full flex-col">
-                <span className="sfc-card__icon" aria-hidden>
-                  {c.icon}
-                </span>
+              <Card
+                key={c.name}
+                className={`sfc-card--accent ${c.accent} flex h-full flex-col`}
+              >
+                <CardIcon>
+                  <ServiceIcon name={c.iconKey} size={26} />
+                </CardIcon>
                 <h3 className="mt-5 text-lg font-semibold">{c.name}</h3>
                 <p className="mt-2 flex-1 text-n-700">{c.description}</p>
               </Card>

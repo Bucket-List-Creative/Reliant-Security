@@ -10,28 +10,28 @@ const FALLBACK: Pick<
 >[] = [
   {
     _id: "f1",
-    icon: "🛡️",
+    iconKey: "shield-check",
     title: "Alarm Systems",
     summary:
       "Intrusion, smoke, and carbon-monoxide detection for homes and businesses, backed by 24/7 professional monitoring.",
   },
   {
     _id: "f2",
-    icon: "📹",
+    iconKey: "cctv",
     title: "Video Surveillance",
     summary:
       "Hardwired and wireless cameras — from a doorbell camera to site-wide industrial coverage — with recording you can review anywhere.",
   },
   {
     _id: "f3",
-    icon: "🔐",
+    iconKey: "key",
     title: "Access Control",
     summary:
       "Keyless entry, mobile credentials, and role-based permissions with a full audit trail on every door.",
   },
   {
     _id: "f4",
-    icon: "🔌",
+    iconKey: "network",
     title: "Structured Cabling & Fiber",
     summary:
       "Cat6/Cat6A, fiber, racks, and pathways — certified, labeled, and documented network infrastructure.",
@@ -74,11 +74,14 @@ export function ServicesGrid({
             const inner = (
               <>
                 <CardIcon>
-                  {isServiceIconKey(service.iconKey) ? (
-                    <ServiceIcon name={service.iconKey} size={26} />
-                  ) : (
-                    (service.icon ?? "🛡️")
-                  )}
+                  <ServiceIcon
+                    name={
+                      isServiceIconKey(service.iconKey)
+                        ? service.iconKey
+                        : "shield-check"
+                    }
+                    size={26}
+                  />
                 </CardIcon>
                 <h3 className="mt-5 text-xl font-semibold">{service.title}</h3>
                 <p className="mt-2 text-[0.95rem] leading-relaxed text-n-700">

@@ -15,7 +15,7 @@ const FALLBACK: IndustryListItem[] = [...INDUSTRIES]
   .map((i) => ({
     _id: `taxonomy-${i.slug}`,
     slug: i.slug,
-    icon: i.icon,
+    iconKey: i.iconKey,
     name: i.name,
     summary: i.summary,
     segments: i.segments,

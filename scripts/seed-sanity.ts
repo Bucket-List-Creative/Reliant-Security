@@ -83,7 +83,7 @@ INDUSTRIES.forEach((ind, i) => {
     _type: "industry",
     name: ind.name,
     slug: slug(ind.slug),
-    icon: ind.icon,
+    iconKey: ind.iconKey,
     summary: ind.summary,
     segments: ind.segments,
     threats: keyed(
