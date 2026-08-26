@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Container } from "@/components/ui/Container";
+import { PreferredSourceButton } from "@/components/sections/PreferredSourceButton";
 import type { SiteSettings } from "@/sanity/lib/types";
 
 const SITEMAP = [
@@ -35,6 +36,15 @@ export function Footer({ settings }: { settings?: SiteSettings | null }) {
               className="h-auto w-44"
             />
             <p className="mt-4 max-w-sm text-n-700">{tagline}</p>
+
+            {/* Google Preferred Sources — sitewide, so it's reachable from any
+                page. It only pays off if readers actually click it. */}
+            <div className="mt-6">
+              <p className="mb-2 text-sm text-n-500">
+                Follow us on Google to see Reliant first.
+              </p>
+              <PreferredSourceButton />
+            </div>
           </div>
 
           <nav aria-label="Footer">

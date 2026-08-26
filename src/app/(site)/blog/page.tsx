@@ -7,6 +7,7 @@ import { Container } from "@/components/ui/Container";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { SanityImage } from "@/components/ui/SanityImage";
+import { PreferredSourceButton } from "@/components/sections/PreferredSourceButton";
 
 export const metadata: Metadata = {
   title: "Resources",
@@ -42,6 +43,15 @@ export default async function BlogIndexPage() {
             cabling and fiber, monitoring, and the compliance questions that
             come up on commercial and government work.
           </p>
+
+          {/* The most contextually honest place for this: readers who want
+              more of our writing are the ones worth asking to follow us. */}
+          <div className="mt-7 flex flex-wrap items-center gap-x-4 gap-y-3">
+            <PreferredSourceButton />
+            <p className="text-sm text-n-500">
+              See our guides first in Google Search and AI results.
+            </p>
+          </div>
         </div>
 
         {posts.length === 0 ? (
