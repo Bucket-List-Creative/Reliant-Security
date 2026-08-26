@@ -632,12 +632,24 @@
 
   /* ---- Tabs ---- */
   .sfc-tabs__list {
-    display: inline-flex;
+    display: flex;
+    width: max-content;
+    max-width: 100%;
     gap: 0.25rem;
     padding: 0.375rem;
     border-radius: var(--radius-pill);
     background: var(--color-surface);
     box-shadow: var(--shadow-soft-in-sm);
+    /* Scroll rather than wrap: a wrapped pill row breaks the pill shape, and
+       four segment tabs plus padding overflow a narrow phone. */
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .sfc-tabs__list::-webkit-scrollbar {
+    display: none;
+  }
+  .sfc-tab {
+    white-space: nowrap;
   }
   .sfc-tab {
     min-height: 44px;

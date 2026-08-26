@@ -22,8 +22,8 @@ import { ServiceAreaMap } from "@/components/ui/ServiceAreaMap";
 import { Hero } from "@/components/sections/Hero";
 import { StatBar } from "@/components/sections/StatBar";
 import { CapabilitiesGrid } from "@/components/sections/CapabilitiesGrid";
-import { ServicesGrid } from "@/components/sections/ServicesGrid";
-import { IndustriesStrip } from "@/components/sections/IndustriesStrip";
+import { ServiceDirectory } from "@/components/sections/ServiceDirectory";
+import { IndustryTabs } from "@/components/sections/IndustryTabs";
 import { ProjectsStrip } from "@/components/sections/ProjectsStrip";
 import { Testimonials } from "@/components/sections/Testimonials";
 import { FaqAccordion } from "@/components/sections/FaqAccordion";
@@ -57,8 +57,8 @@ export default async function HomePage() {
       <StatBar stats={stats.data as Stat[]} />
       {/* Full scope of the company, before anything residential-specific. */}
       <CapabilitiesGrid />
-      <ServicesGrid services={services.data as Service[]} />
-      <IndustriesStrip industries={industries.data as IndustryListItem[]} />
+      <ServiceDirectory services={services.data as Service[]} />
+      <IndustryTabs industries={industries.data as IndustryListItem[]} />
       <ProjectsStrip
         projects={projects.data as ProjectListItem[]}
         localImageBySlug={LOCAL_PROJECT_IMAGES}
