@@ -702,79 +702,9 @@
     background: var(--color-brand);
   }
 
-  /* ---- Service-area map (Leaflet) ---- */
-  .leaflet-container {
+  /* ---- Service-area map (Google Maps) ---- */
+  .sfc-map {
     font-family: var(--font-body);
-    background: var(--color-surface);
-  }
-  .reliant-pin {
-    background: transparent;
-    border: none;
-  }
-  /* Logo badge marker */
-  .reliant-logo-pin {
-    position: relative;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--color-n-000);
-    border: 3px solid var(--color-brand);
-    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.28);
-    display: grid;
-    place-items: center;
-    transition: transform var(--dur-fast) var(--ease-soft);
-  }
-  .reliant-logo-pin::after {
-    content: "";
-    position: absolute;
-    bottom: -6px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-top: 8px solid var(--color-brand);
-  }
-  .reliant-logo-pin img {
-    width: 22px;
-    height: 22px;
-    object-fit: contain;
-  }
-  .reliant-logo-pin.is-active {
-    transform: scale(1.18);
-    z-index: 500;
-    border-color: var(--color-brand-press);
-  }
-  .reliant-logo-pin.is-active::after {
-    border-top-color: var(--color-brand-press);
-  }
-  .reliant-map-tooltip.leaflet-tooltip {
-    background: var(--color-brand-press);
-    color: var(--color-white);
-    border: none;
-    border-radius: var(--radius-pill);
-    padding: 0.25rem 0.65rem;
-    font-family: var(--font-body);
-    font-weight: 600;
-    font-size: 0.78rem;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
-  }
-  .reliant-map-tooltip.leaflet-tooltip-top::before {
-    border-top-color: var(--color-brand-press);
-  }
-  /* Neumorphic zoom buttons */
-  .leaflet-touch .leaflet-bar,
-  .leaflet-bar {
-    border: none;
-    box-shadow: var(--shadow-soft-2);
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-  }
-  .leaflet-bar a {
-    background: var(--color-surface-raised);
-    color: var(--color-ink);
-    border-bottom-color: var(--color-n-200);
-  }
-  .leaflet-bar a:hover {
     background: var(--color-surface);
   }
 

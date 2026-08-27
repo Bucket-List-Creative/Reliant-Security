@@ -1,19 +1,44 @@
 "use client";
 
-import "leaflet/dist/leaflet.css";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import type * as Leaflet from "leaflet";
 import { IconSearch, IconX, IconChevronRight } from "@tabler/icons-react";
 import {
   SERVICE_LOCATIONS,
   SERVICE_REGIONS,
   MAP_CONFIG,
   HOME_BASE,
+  GOOGLE_MAPS_API_KEY,
   type ServiceLocation,
   type ServiceRegion,
 } from "@/config/serviceAreas";
 
 const LOGO_SRC = "/Images/Logo/logo-icon.png";
+
+let googleMapsPromise: Promise<typeof google> | null = null;
+
+function loadGoogleMaps(): Promise<typeof google> {
+  if (window.google?.maps) return Promise.resolve(window.google);
+  if (googleMapsPromise) return googleMapsPromise;
+
+  googleMapsPromise = new Promise((resolve, reject) => {
+    const callbackName = `reliantGoogleMapsReady_${Date.now()}`;
+    window[callbackName as keyof Window] = (() => {
+      delete window[callbackName as keyof Window];
+      resolve(window.google);
+    }) as never;
+
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(GOOGLE_MAPS_API_KEY)}&callback=${callbackName}&v=weekly`;
+    script.async = true;
+    script.onerror = () => {
+      googleMapsPromise = null;
+      reject(new Error("Google Maps failed to load."));
+    };
+    document.head.appendChild(script);
+  });
+
+  return googleMapsPromise;
+}
 
 type Props = {
   locations?: ServiceLocation[];
@@ -83,12 +108,13 @@ export function ServiceAreaMap({
   className,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<Leaflet.Map | null>(null);
-  const LRef = useRef<typeof Leaflet | null>(null);
-  const layerRef = useRef<Leaflet.LayerGroup | null>(null);
-  const markerByName = useRef<Map<string, Leaflet.Marker>>(new Map());
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const polygonRef = useRef<google.maps.Polygon | null>(null);
+  const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
+  const markerByName = useRef<Map<string, google.maps.Marker>>(new Map());
 
   const [ready, setReady] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
   const [region, setRegion] = useState<"all" | ServiceRegion>("all");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
@@ -134,95 +160,100 @@ export function ServiceAreaMap({
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const mod = await import("leaflet");
-      const L = (mod.default ?? mod) as typeof Leaflet;
+      if (!GOOGLE_MAPS_API_KEY) {
+        throw new Error("Google Maps API key is missing.");
+      }
+      const g = await loadGoogleMaps();
       if (cancelled || !containerRef.current || mapRef.current) return;
 
-      const map = L.map(containerRef.current, {
-        scrollWheelZoom: true,
-        zoomControl: true,
-      }).setView(MAP_CONFIG.defaultCenter, MAP_CONFIG.defaultZoom);
-
-      L.tileLayer(MAP_CONFIG.tileUrl, {
-        attribution: MAP_CONFIG.tileAttribution,
+      mapRef.current = new g.maps.Map(containerRef.current, {
+        center: {
+          lat: MAP_CONFIG.defaultCenter[0],
+          lng: MAP_CONFIG.defaultCenter[1],
+        },
+        zoom: MAP_CONFIG.defaultZoom,
         maxZoom: MAP_CONFIG.maxZoom,
-      }).addTo(map);
-
-      LRef.current = L;
-      mapRef.current = map;
-      layerRef.current = L.layerGroup().addTo(map);
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: true,
+        gestureHandling: "cooperative",
+      });
+      infoWindowRef.current = new g.maps.InfoWindow();
       setReady(true);
-    })();
+    })().catch((error: unknown) => {
+      if (!cancelled) {
+        setMapError(
+          error instanceof Error ? error.message : "Google Maps failed to load.",
+        );
+      }
+    });
 
     return () => {
       cancelled = true;
-      mapRef.current?.remove();
       mapRef.current = null;
-      layerRef.current = null;
+      infoWindowRef.current = null;
       setReady(false);
     };
   }, []);
 
   // ---- (Re)draw markers + boundary when the visible set changes ----
   useEffect(() => {
-    const L = LRef.current;
     const map = mapRef.current;
-    const layer = layerRef.current;
-    if (!ready || !L || !map || !layer) return;
+    if (!ready || !map) return;
 
-    layer.clearLayers();
+    markerByName.current.forEach((marker) => marker.setMap(null));
     markerByName.current.clear();
+    polygonRef.current?.setMap(null);
+    polygonRef.current = null;
 
     // The boundary is always computed from every visible community; only the
     // pins differ between modes.
     const pinned = pins === "home" ? [HOME_BASE] : visible;
 
     pinned.forEach((loc) => {
-      const icon = L.divIcon({
-        className: "",
-        html: `<div class="reliant-logo-pin"><img src="${LOGO_SRC}" alt="" /></div>`,
-        iconSize: [40, 46],
-        iconAnchor: [20, 46],
-        tooltipAnchor: [0, -42],
+      const label = pins === "home" ? `Reliant Security — ${loc.name}, MO` : `${loc.name}, MO`;
+      const m = new google.maps.Marker({
+        map,
+        position: { lat: loc.lat, lng: loc.lng },
+        title: label,
+        icon: { url: LOGO_SRC, scaledSize: new google.maps.Size(36, 36) },
       });
-      const m = L.marker([loc.lat, loc.lng], { icon }).addTo(layer);
-      m.bindTooltip(
-        pins === "home" ? `Reliant Security — ${loc.name}, MO` : loc.name,
-        { direction: "top", className: "reliant-map-tooltip" },
-      );
-      m.on("click", () => setSelected(loc.name));
+      m.addListener("click", () => {
+        setSelected(loc.name);
+        infoWindowRef.current?.setContent(`<strong>${label}</strong>`);
+        infoWindowRef.current?.open({ map, anchor: m });
+      });
       markerByName.current.set(loc.name, m);
     });
 
-    let bounds: Leaflet.LatLngBounds | null = null;
+    const bounds = new google.maps.LatLngBounds();
+    visible.forEach((loc) => bounds.extend({ lat: loc.lat, lng: loc.lng }));
     if (showBoundary) {
       const hull = convexHull(visible);
       if (hull.length >= 3) {
-        L.polygon(hull, {
-          color: MAP_CONFIG.colors.boundary,
-          weight: 3,
-          opacity: 0.9,
+        polygonRef.current = new google.maps.Polygon({
+          map,
+          paths: hull.map(([lat, lng]) => ({ lat, lng })),
+          strokeColor: MAP_CONFIG.colors.boundary,
+          strokeWeight: 3,
+          strokeOpacity: 0.9,
           fillColor: MAP_CONFIG.colors.primary,
           fillOpacity: 0.1,
-          dashArray: "8,7",
-          lineCap: "round",
-          lineJoin: "round",
-          interactive: false,
-        }).addTo(layer);
-        bounds = L.polygon(hull).getBounds();
+          clickable: false,
+        });
       }
     }
-    if (!bounds && visible.length) {
-      bounds = L.latLngBounds(visible.map((l) => [l.lat, l.lng]));
-    }
-    if (bounds) map.fitBounds(bounds.pad(0.12));
+    if (!bounds.isEmpty()) map.fitBounds(bounds, 32);
   }, [ready, visible, showBoundary, pins]);
 
   // ---- Reflect the active selection on the marker ----
   useEffect(() => {
     markerByName.current.forEach((m, name) => {
-      const el = m.getElement()?.querySelector(".reliant-logo-pin");
-      el?.classList.toggle("is-active", name === selected);
+      m.setIcon({
+        url: LOGO_SRC,
+        scaledSize: new google.maps.Size(name === selected ? 44 : 36, name === selected ? 44 : 36),
+      });
+      m.setZIndex(name === selected ? 1000 : undefined);
     });
   }, [selected, visible]);
 
@@ -230,8 +261,13 @@ export function ServiceAreaMap({
     const map = mapRef.current;
     if (!map) return;
     setSelected(loc.name);
-    map.flyTo([loc.lat, loc.lng], 12, { duration: 0.6 });
-    markerByName.current.get(loc.name)?.openTooltip();
+    map.panTo({ lat: loc.lat, lng: loc.lng });
+    map.setZoom(12);
+    const marker = markerByName.current.get(loc.name);
+    if (marker) {
+      infoWindowRef.current?.setContent(`<strong>${loc.name}, MO</strong>`);
+      infoWindowRef.current?.open({ map, anchor: marker });
+    }
   }
 
   function onSubmit(e: FormEvent) {
@@ -399,6 +435,11 @@ export function ServiceAreaMap({
             role="application"
             aria-label="Map of Reliant Security service-area communities"
           />
+          {mapError && (
+            <p className="grid min-h-48 place-items-center p-6 text-center text-n-700" role="alert">
+              {mapError} Please try again later.
+            </p>
+          )}
         </div>
       </div>
     </div>

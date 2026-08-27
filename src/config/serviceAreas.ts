@@ -1,8 +1,8 @@
 /**
  * Service-area map data + configuration.
  *
- * The map (see `src/components/ui/ServiceAreaMap.tsx`) is built on Leaflet with
- * free OpenStreetMap / CARTO tiles, so **no API key is required**. To add a new
+ * The map (see `src/components/ui/ServiceAreaMap.tsx`) uses the Google Maps
+ * JavaScript API. To add a new
  * community, just append an entry to `RAW_LOCATIONS` below — the map, search,
  * region filter, and service-area boundary all update automatically.
  */
@@ -37,11 +37,6 @@ export const MAP_CONFIG = {
     boundary: "#00734a", // service-area outline
     boundaryFill: "rgba(0,140,88,0.10)",
   },
-  // Free, no-key raster tiles. Swap this URL for a Google tile source only if
-  // you decide to use Google Maps (see GOOGLE_MAPS_API_KEY below).
-  tileUrl: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-  tileAttribution:
-    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
   maxZoom: 18,
   /** Fallback view if the boundary can't be computed. */
   defaultCenter: [38.72, -90.55] as [number, number],
@@ -50,12 +45,8 @@ export const MAP_CONFIG = {
 
 /**
  * ── Google Maps API key ─────────────────────────────────────────────
- * NOT needed for the current map (it uses free OpenStreetMap/CARTO tiles).
- *
- * If you later switch `MAP_CONFIG.tileUrl` to a Google tile source, put the
- * key here. Two options:
- *   1) Recommended — add `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=...` to `.env.local`.
- *   2) Or paste the literal key as the fallback string below.
+ * Add `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=...` to `.env.local` and to the hosting
+ * provider's build environment.
  * Because it ships to the browser it is a PUBLIC key — lock it down with an
  * HTTP-referrer restriction in the Google Cloud console.
  */
