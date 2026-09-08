@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 
@@ -13,31 +14,43 @@ export function CtaBanner({
   return (
     <section className="sfc-section">
       <Container>
-        {/* Dark band, matching the stat bar — the page opens and closes on the
+        {/* The wrapper exists so the truck can hang above the band: `.sfc-band`
+            carries `overflow: hidden` for its gradient, which would crop a
+            vehicle parked on its roof. */}
+        <div className="sfc-cta-park">
+          <Image
+            src="/Images/photos/reliant-truck.webp"
+            alt=""
+            width={1000}
+            height={547}
+            className="sfc-cta-park__truck"
+          />
+          {/* Dark band, matching the stat bar — the page opens and closes on the
             brand colour, with the pale card sections between them. */}
-        <div
-          className="sfc-band px-6 py-14 text-center sm:px-8 sm:py-16"
-          style={{ boxShadow: "var(--shadow-overlay)" }}
-        >
-          <h2 className="mx-auto max-w-2xl text-3xl font-bold sm:text-4xl">
-            {heading}
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg">
-            {subheading}
-          </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button href="/contact" variant="cta">
-              Get a Same-Day Quote
-            </Button>
-            {phone && (
-              <a
-                href={`tel:${phone}`}
-                className="sfc-btn border-white/35 bg-transparent text-white hover:bg-white/10"
-                style={{ boxShadow: "none" }}
-              >
-                Call {phone}
-              </a>
-            )}
+          <div
+            className="sfc-band px-6 py-14 text-center sm:px-8 sm:py-16"
+            style={{ boxShadow: "var(--shadow-overlay)" }}
+          >
+            <h2 className="mx-auto max-w-2xl text-3xl font-bold sm:text-4xl">
+              {heading}
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg">
+              {subheading}
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Button href="/contact" variant="cta">
+                Get a Same-Day Quote
+              </Button>
+              {phone && (
+                <a
+                  href={`tel:${phone}`}
+                  className="sfc-btn border-white/35 bg-transparent text-white hover:bg-white/10"
+                  style={{ boxShadow: "none" }}
+                >
+                  Call {phone}
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </Container>

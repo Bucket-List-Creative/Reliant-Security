@@ -1,3 +1,5 @@
+import { FaqAccordion } from "@/components/sections/FaqAccordion";
+import { ABOUT_FAQS } from "@/content/faqs";
 import type { Metadata } from "next";
 import { sanityFetch } from "@/sanity/lib/live";
 import {
@@ -282,6 +284,8 @@ export default async function AboutPage() {
         testimonials={testimonials as Testimonial[]}
         heading="What our customers say"
       />
+
+      <FaqAccordion faqs={ABOUT_FAQS} heading="About Reliant FAQs" />
 
       <CtaBanner phone={s?.phone} />
     </>

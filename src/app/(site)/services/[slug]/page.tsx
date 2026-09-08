@@ -96,9 +96,9 @@ function resolve(slug: string, cms: Service | null): ResolvedService | null {
           description: b.description ?? "",
         }))
       : (t?.benefits ?? []),
-    faqs: cms?.faqs?.length
-      ? cms.faqs.map((f) => ({ question: f.question, answer: f.answer }))
-      : (t?.faqs ?? []),
+    // Workbook FAQ copy is authoritative for the built-in service pages.
+    // CMS-only services keep their own FAQs.
+    faqs: t?.faqs ?? cms?.faqs?.map((f) => ({ question: f.question, answer: f.answer })) ?? [],
     heroImage: cms?.heroImage,
     body: cms?.body,
   };
@@ -215,7 +215,7 @@ export default async function ServiceDetailPage({ params }: Props) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
       />
 
       {/* Hero */}
@@ -379,6 +379,17 @@ export default async function ServiceDetailPage({ params }: Props) {
                   answer: f.answer,
                 }))}
               />
+              <Button href="/contact" className="mt-6">
+                {svc.categorySlug === "alarm-systems"
+                  ? "Design My Security System"
+                  : svc.categorySlug === "video-surveillance"
+                    ? "Schedule a Camera Assessment"
+                    : slug === "access-control"
+                      ? "Plan My Access System"
+                      : slug === "network-cabling"
+                        ? "Request a Cabling Quote"
+                        : "Talk With Reliant"}
+              </Button>
             </div>
           </Container>
         </section>

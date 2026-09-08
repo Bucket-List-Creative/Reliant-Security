@@ -1,50 +1,65 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { IconCheck } from "@tabler/icons-react";
 import { Card } from "@/components/ui/Card";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { SERVICE_CATEGORIES } from "@/content/services";
 
-type Status = "idle" | "success";
+type Status = "idle" | "sending" | "success" | "error";
 
-/**
- * Contact / quote form with client-side validation.
- *
- * NOTE: submission is not wired to a backend yet. Plug in a route handler
- * (e.g. src/app/api/contact/route.ts) or a form service and replace the
- * simulated success below.
- */
 export function ContactForm() {
   const [status, setStatus] = useState<Status>("idle");
+  const submitting = useRef(false);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    // TODO: POST to your contact endpoint / email service here.
-    setStatus("success");
+    if (submitting.current) return;
+    submitting.current = true;
+    setStatus("sending");
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        body: new FormData(e.currentTarget),
+      });
+      const result = await response.json();
+      setStatus(response.ok && result.success === true ? "success" : "error");
+    } catch {
+      setStatus("error");
+    } finally {
+      submitting.current = false;
+    }
   }
 
   if (status === "success") {
     return (
       <Card className="text-center">
-        <div className="sfc-card__icon mx-auto">
-          <IconCheck size={26} stroke={2.5} />
+        <div role="status" aria-live="polite">
+          <div className="sfc-card__icon mx-auto">
+            <IconCheck size={26} stroke={2.5} />
+          </div>
+          <h2 className="mt-4 text-2xl font-semibold">
+            Thank you for trusting Reliant Security
+          </h2>
+          <p className="mt-2 text-n-700">
+            Your request has been received. Our team will review your needs and
+            reach out to help protect what matters most to you.
+            No obligation, no pressure.
+          </p>
         </div>
-        <h2 className="mt-4 text-2xl font-semibold">
-          Thanks — your quote is on the way
-        </h2>
-        <p className="mt-2 text-n-700">
-          We&apos;ll review your project and send a detailed proposal, often the
-          same day. No obligation, no pressure.
-        </p>
+        <Button href="/" variant="primary" className="mt-6">
+          Back to home
+        </Button>
       </Card>
     );
   }
 
   return (
     <Card>
-      <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+      <form onSubmit={handleSubmit} className="space-y-5" aria-busy={status === "sending"}>
+        <input type="text" name="website" tabIndex={-1} autoComplete="off" hidden aria-hidden="true" />
         <div className="grid gap-5 sm:grid-cols-2">
           <Input label="Full name" name="name" autoComplete="name" required />
           <Input
@@ -78,13 +93,13 @@ export function ContactForm() {
               {SERVICE_CATEGORIES.map((cat) => (
                 <optgroup key={cat.slug} label={cat.title}>
                   {cat.services.map((s) => (
-                    <option key={s.slug} value={s.slug}>
+                    <option key={s.slug} value={s.title}>
                       {s.title}
                     </option>
                   ))}
                 </optgroup>
               ))}
-              <option value="not-sure">Not sure yet</option>
+              <option value="Not sure yet">Not sure yet</option>
             </select>
           </div>
         </div>
@@ -101,7 +116,7 @@ export function ContactForm() {
                 <input
                   type="radio"
                   name="propertyType"
-                  value={type.toLowerCase()}
+                  value={type}
                   defaultChecked={i === 0}
                   className="accent-brand"
                 />
@@ -119,14 +134,21 @@ export function ContactForm() {
         />
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <Button type="submit" variant="primary" className="w-full sm:w-auto">
-            Get my same-day quote
+          <Button type="submit" variant="primary" className="w-full sm:w-auto" disabled={status === "sending"}>
+            {status === "sending" ? "Sending your request…" : "Get my same-day quote"}
           </Button>
           <p className="text-xs text-n-500">
             We respect your privacy — your details are only used to reply to your
             request.
           </p>
         </div>
+        {status === "error" && (
+          <p role="alert" className="text-sm text-n-700">
+            We couldn&apos;t confirm your request was received. Your details are
+            still here. Please try again, or contact us using the phone or email
+            listed on this page.
+          </p>
+        )}
       </form>
     </Card>
   );
