@@ -1,3 +1,5 @@
+import { FaqAccordion } from "@/components/sections/FaqAccordion";
+import { CONTACT_FAQS } from "@/content/faqs";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import {
@@ -270,6 +272,8 @@ export default async function ContactPage() {
           </div>
         </Container>
       </section>
+
+      <FaqAccordion faqs={CONTACT_FAQS} heading="Contact FAQs" />
 
       {/* Map + areas served */}
       <section className="sfc-section pt-0">

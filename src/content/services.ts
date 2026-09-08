@@ -1,3 +1,4 @@
+import { SERVICE_FAQS } from "@/content/faqs";
 import type { ServiceIconKey } from "@/components/ui/ServiceIcon";
 
 /**
@@ -93,23 +94,7 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
               "Cellular and battery backup keep the system online through power and phone-line failures.",
           },
         ],
-        faqs: [
-          {
-            question: "What happens when my alarm goes off?",
-            answer:
-              "The signal reaches our monitoring center in seconds. An operator works to verify the alarm and, if it's confirmed, dispatches emergency responders while notifying you and your emergency contacts.",
-          },
-          {
-            question: "Will the alarm still work in a power outage?",
-            answer:
-              "Yes. A backup battery keeps the panel running and cellular communication keeps it reporting even without power or a landline.",
-          },
-          {
-            question: "Can I add cameras or smart devices later?",
-            answer:
-              "Absolutely. Our alarm systems are modular, so you can add cameras, smart locks, and automation whenever you're ready.",
-          },
-        ],
+        faqs: SERVICE_FAQS["security-alarm"],
       },
       {
         slug: "interactive-alarm",
@@ -145,23 +130,7 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
               "Trigger lights, locks, and thermostats automatically when you arm or disarm.",
           },
         ],
-        faqs: [
-          {
-            question: "Do I need special equipment for app control?",
-            answer:
-              "You'll need an interactive-capable panel and a monitoring plan that includes app access. We confirm compatibility during your free assessment and recommend the right upgrade if needed.",
-          },
-          {
-            question: "Can multiple family members or employees have access?",
-            answer:
-              "Yes. You can create individual user codes and app logins with different permission levels for each person.",
-          },
-          {
-            question: "Will I still be notified if the internet goes down?",
-            answer:
-              "Interactive systems use cellular as a backup path, so alerts and monitoring continue even if your Wi-Fi drops.",
-          },
-        ],
+        faqs: SERVICE_FAQS["interactive-alarm"],
       },
       {
         slug: "wellness-safety-monitoring",
@@ -197,23 +166,7 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
               "Flood and temperature sensors catch leaks and freezes before they cause costly damage.",
           },
         ],
-        faqs: [
-          {
-            question: "How does a medical alert work?",
-            answer:
-              "Pressing the pendant or panic button signals our monitoring center, which contacts you and dispatches help or notifies your emergency contacts right away.",
-          },
-          {
-            question: "Can I get alerts if a pipe leaks while I'm away?",
-            answer:
-              "Yes. Water and temperature sensors send you and our center an immediate alert so damage can be stopped early.",
-          },
-          {
-            question: "Is this suitable for elderly parents living alone?",
-            answer:
-              "It's one of the most common uses. Wearable buttons and automatic sensors provide a safety net without being intrusive.",
-          },
-        ],
+        faqs: SERVICE_FAQS["wellness-safety-monitoring"],
       },
       {
         slug: "security-system-installation",
@@ -249,23 +202,7 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
               "Full testing and hands-on training so nothing is left to guesswork.",
           },
         ],
-        faqs: [
-          {
-            question: "How long does installation take?",
-            answer:
-              "Most residential systems are installed in a day. Larger commercial projects are scheduled in phases, and we give you a clear timeline up front.",
-          },
-          {
-            question: "Do you clean up and hide wiring?",
-            answer:
-              "Yes. We route and conceal cabling for a tidy, finished look and remove all debris when we're done.",
-          },
-          {
-            question: "Can you take over or upgrade an existing system?",
-            answer:
-              "Often, yes. We audit your current equipment and reuse what makes sense while upgrading what doesn't.",
-          },
-        ],
+        faqs: SERVICE_FAQS["security-system-installation"],
       },
     ],
   },
@@ -310,23 +247,7 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
               "Keep footage on-site, in the cloud, or both, with retention that fits your needs.",
           },
         ],
-        faqs: [
-          {
-            question: "How much footage can I keep?",
-            answer:
-              "Storage is configurable — from a couple of weeks to several months — depending on resolution, camera count, and your recorder or cloud plan.",
-          },
-          {
-            question: "Can I watch the cameras from my phone?",
-            answer:
-              "Yes. Live view and playback are available from a secure mobile app and desktop, wherever you are.",
-          },
-          {
-            question: "Do hardwired cameras work at night?",
-            answer:
-              "Our cameras include infrared or low-light night vision for clear footage after dark.",
-          },
-        ],
+        faqs: SERVICE_FAQS["cctv-surveillance"],
       },
       {
         slug: "wireless-video",
@@ -362,23 +283,7 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
               "Talk to visitors or deter intruders straight from your phone.",
           },
         ],
-        faqs: [
-          {
-            question: "Are wireless cameras reliable?",
-            answer:
-              "Modern wireless cameras are very dependable within good signal range. We plan placement carefully to ensure a strong, stable connection.",
-          },
-          {
-            question: "Do they need to be charged?",
-            answer:
-              "Some are battery-powered and others plug in. We recommend the right mix for maintenance-free coverage at your property.",
-          },
-          {
-            question: "Where is the video stored?",
-            answer:
-              "Clips are stored securely in the cloud, so footage is safe even if a camera is stolen or damaged.",
-          },
-        ],
+        faqs: SERVICE_FAQS["wireless-video"],
       },
     ],
   },
@@ -431,33 +336,7 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
               "Labeled runs, tidy racks, and as-builts that make support and expansion straightforward.",
           },
         ],
-        faqs: [
-          {
-            question: "Do you handle both the cabling and the network gear?",
-            answer:
-              "Yes. We run and certify the cabling and configure the switching, Wi-Fi, and networking that rides on it — one accountable team rather than two contractors pointing at each other.",
-          },
-          {
-            question: "Can you run fiber between separate buildings?",
-            answer:
-              "Routinely. Single- and multi-mode fiber is how we connect plants, offices, scale houses, and outbuildings that are too far apart for copper — a standard part of our industrial and campus work.",
-          },
-          {
-            question: "Can you cable a building that's already occupied?",
-            answer:
-              "Yes. We regularly work around live operations and production schedules, phasing the work and coordinating with your team to keep disruption down.",
-          },
-          {
-            question: "Do you provide certification testing and documentation?",
-            answer:
-              "Every run is tested and labeled, and we provide test results and as-built documentation. On specified commercial and government projects, submittals and closeout documentation are part of the deliverable.",
-          },
-          {
-            question: "Can you supply NDAA/TAA-compliant equipment?",
-            answer:
-              "Yes. Where a project requires NDAA Section 889 or TAA-compliant hardware, we specify and supply it. We aren't tied to a single manufacturer, so we build to the compliance requirement rather than around it.",
-          },
-        ],
+        faqs: SERVICE_FAQS["network-cabling"],
       },
       {
         slug: "audio-video",
@@ -493,23 +372,7 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
               "Systems tuned to the space, whether it's a patio, showroom, or conference room.",
           },
         ],
-        faqs: [
-          {
-            question: "Can you install audio in multiple rooms?",
-            answer:
-              "Yes. Distributed audio lets you play the same or different sources in each zone, all controlled centrally.",
-          },
-          {
-            question: "Do you set up conference-room video?",
-            answer:
-              "We design and install complete conferencing AV — displays, cameras, microphones, and one-touch control.",
-          },
-          {
-            question: "Will everything be on one remote?",
-            answer:
-              "We consolidate control so you're not juggling multiple remotes or apps to run the room.",
-          },
-        ],
+        faqs: SERVICE_FAQS["audio-video"],
       },
     ],
   },
@@ -554,23 +417,7 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
               "Scenes and automations handle everyday tasks so you don't have to.",
           },
         ],
-        faqs: [
-          {
-            question: "Does automation work with devices I already own?",
-            answer:
-              "In many cases, yes. We integrate popular smart-home platforms and confirm exactly what's compatible during the design stage.",
-          },
-          {
-            question: "Can I control the system by voice?",
-            answer:
-              "Yes. We integrate with major voice assistants for hands-free control of your scenes and devices.",
-          },
-          {
-            question: "Is it hard to use?",
-            answer:
-              "Not at all. We configure everything for you and keep the controls simple and intuitive for the whole household or team.",
-          },
-        ],
+        faqs: SERVICE_FAQS["smart-automation"],
       },
       {
         slug: "access-control",
@@ -606,23 +453,7 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
               "Every unlock is time-stamped for accountability and investigations.",
           },
         ],
-        faqs: [
-          {
-            question: "What kinds of credentials can we use?",
-            answer:
-              "Keypads, key fobs, proximity cards, and mobile credentials — often several at once for different groups of users.",
-          },
-          {
-            question: "Can I lock or unlock doors remotely?",
-            answer:
-              "Yes. Authorized administrators can lock down or open doors from anywhere through the management app.",
-          },
-          {
-            question: "Does it integrate with our cameras and alarm?",
-            answer:
-              "It does. Access, video, and alarm can work together so events are linked and easy to review in one place.",
-          },
-        ],
+        faqs: SERVICE_FAQS["access-control"],
       },
     ],
   },
@@ -667,23 +498,7 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
               "Continuous watch for threats so issues are caught early, not after damage is done.",
           },
         ],
-        faqs: [
-          {
-            question: "Is cyber security relevant for a small business?",
-            answer:
-              "Very. Small businesses are frequent targets precisely because they're often under-protected — right-sized defenses make a big difference.",
-          },
-          {
-            question: "Do you assess our current setup first?",
-            answer:
-              "Yes. We start with a security assessment to find gaps, then recommend practical, prioritized fixes.",
-          },
-          {
-            question: "How does this connect to my physical security?",
-            answer:
-              "Networked cameras and access systems are potential entry points. Securing them protects both your data and your building.",
-          },
-        ],
+        faqs: SERVICE_FAQS["cyber-security"],
       },
       {
         slug: "managed-it",
@@ -719,23 +534,7 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
               "A help desk that answers when you need it, from a team that knows your setup.",
           },
         ],
-        faqs: [
-          {
-            question: "What does managed IT actually cover?",
-            answer:
-              "Typically monitoring, updates, security, backups, and help-desk support. We tailor the scope to what your business needs.",
-          },
-          {
-            question: "Can you support both our IT and security systems?",
-            answer:
-              "Yes, and that's a real advantage — one accountable partner for your technology and your protection.",
-          },
-          {
-            question: "How quickly do you respond to issues?",
-            answer:
-              "We provide agreed response times and proactive monitoring, so many issues are handled before you even notice them.",
-          },
-        ],
+        faqs: SERVICE_FAQS["managed-it"],
       },
     ],
   },

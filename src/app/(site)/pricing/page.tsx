@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { sanityFetch } from "@/sanity/lib/live";
-import { PLANS_QUERY, FAQS_QUERY } from "@/sanity/lib/queries";
-import type { Plan, Faq } from "@/sanity/lib/types";
+import { PLANS_QUERY } from "@/sanity/lib/queries";
+import type { Plan } from "@/sanity/lib/types";
 import { Container } from "@/components/ui/Container";
 import { Badge } from "@/components/ui/Badge";
 import { PricingTable } from "@/components/sections/PricingTable";
 import { FaqAccordion } from "@/components/sections/FaqAccordion";
+
+import { PRICING_FAQS } from "@/content/faqs";
 
 export const metadata: Metadata = {
   title: "Pricing",
@@ -14,10 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function PricingPage() {
-  const [{ data: plans }, { data: faqs }] = await Promise.all([
-    sanityFetch({ query: PLANS_QUERY }),
-    sanityFetch({ query: FAQS_QUERY }),
-  ]);
+  const { data: plans } = await sanityFetch({ query: PLANS_QUERY });
 
   return (
     <>
@@ -46,7 +45,7 @@ export default async function PricingPage() {
         </Container>
       </section>
 
-      <FaqAccordion faqs={faqs as Faq[]} heading="Pricing questions" />
+      <FaqAccordion faqs={PRICING_FAQS} heading="Pricing questions" />
     </>
   );
 }

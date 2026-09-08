@@ -744,3 +744,227 @@
     padding-left: 1.5rem;
   }
 }
+
+/* ------------------------------------------------------------------
+   sfc-watchcam — the dome camera mounted on the navbar
+   A real turret camera bolted to the bottom-right corner of the nav pill,
+   its lens lit green and spilling a soft cone of light down over the page.
+   It rides along with the sticky header, so it watches every screen.
+   ------------------------------------------------------------------ */
+@layer components {
+  .sfc-watchcam {
+    position: absolute;
+    /* Hung off the pill's bottom edge, then pulled back up so the top of the
+       housing disappears behind the bar — the camera is the pill's previous
+       sibling, so the pill paints over that overlap. */
+    top: 100%;
+    right: clamp(0.5rem, 1.2vw, 1rem);
+    margin-top: calc(var(--cam-size) * -0.32);
+    display: block;
+    width: var(--cam-size);
+
+    --cam-size: clamp(3.75rem, 6vw, 5.5rem);
+    --cam-led: var(--color-brand-hover);
+    --cam-led-soft: rgb(var(--color-brand-rgb) / 0.5);
+    --cam-beam-opacity: 0.24;
+    /* One full retract-and-return. The beam runs on the same clock. */
+    --cam-cycle: 14s;
+
+    /* Retracts up behind the bar, waits, then slides back out — the pill it
+       hides behind is the same sibling that paints over its housing. The whole
+       camera fades on the way, beam included, so nothing is left over. Under a
+       reduced-motion preference the global rule collapses this to a single
+       frame, leaving the base styles: camera out, beam lit. */
+    animation: sfc-cam-peek var(--cam-cycle) ease-in-out infinite;
+    will-change: transform, opacity;
+
+    /* Decorative furniture — it must never swallow a click meant for the page
+       underneath, and it isn't announced to screen readers. */
+    pointer-events: none;
+  }
+
+  @media print {
+    .sfc-watchcam {
+      display: none;
+    }
+  }
+
+  .sfc-watchcam__img {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 10px 16px rgb(0 0 0 / 0.28));
+  }
+
+  /* Light cone spilling out of the lens toward the page content on the left.
+     Sits behind the housing so the apex is hidden under the dome's rim. */
+  .sfc-watchcam__beam {
+    position: absolute;
+    top: 46%;
+    left: 48%;
+    width: calc(var(--cam-size) * 1.5);
+    height: calc(var(--cam-size) * 2.4);
+    /* Centred with a negative margin rather than `translateX(-50%)`: the
+       translate would shift the box out from under `transform-origin`, and the
+       rotation would then swing the cone off to the side instead of pivoting
+       it about the lens. Positive rotation is clockwise, which swings a cone
+       hanging BELOW its origin over to the left — toward the page content,
+       not the margin. */
+    margin-left: calc(var(--cam-size) * -0.75);
+    transform: rotate(24deg);
+    transform-origin: 50% 0;
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+    background: linear-gradient(
+      to bottom,
+      var(--cam-led-soft),
+      transparent 74%
+    );
+    /* The clip-path alone leaves three ruler-straight edges, which reads as a
+       flat triangle rather than light. Feathering the outer edges with a mask
+       — the apex sits at 50%, so it stays fully lit — plus a wide blur gives
+       the spill its falloff. */
+    mask-image: linear-gradient(
+      to right,
+      transparent 2%,
+      #000 34%,
+      #000 66%,
+      transparent 98%
+    );
+    opacity: var(--cam-beam-opacity);
+    filter: blur(9px);
+    /* The beam hangs far below the housing, so the camera sliding up doesn't
+       take it with it — left on the container's fade alone it would linger as
+       a cone of light with no camera above it. It runs the same clock, lit a
+       beat after the lens appears and out a beat before it retracts. */
+    animation: sfc-cam-beam var(--cam-cycle) ease-in-out infinite;
+  }
+
+  /* Below desktop widths the content runs right up under the camera, so the
+     spill lands on headline text. Pull it back to a hint of light there. */
+  @media (max-width: 1023px) {
+    .sfc-watchcam {
+      --cam-beam-opacity: 0.12;
+    }
+  }
+
+  /* Lens glow and the IR illuminator below it, positioned against the
+     artwork's own geometry (percentages of the 512×512 source). */
+  .sfc-watchcam__lens,
+  .sfc-watchcam__lamp {
+    position: absolute;
+    background: radial-gradient(
+      closest-side,
+      var(--cam-led) 0%,
+      var(--cam-led-soft) 42%,
+      transparent 78%
+    );
+  }
+
+  .sfc-watchcam__lens {
+    top: 56.5%;
+    left: 47.5%;
+    width: 30%;
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    opacity: 0.85;
+  }
+
+  .sfc-watchcam__lamp {
+    top: 72.5%;
+    left: 50%;
+    width: 30%;
+    height: 12%;
+    transform: translate(-50%, -50%);
+    border-radius: var(--radius-pill);
+    opacity: 0.4;
+  }
+
+  /* The retract stops at -64% rather than travelling the camera's full height:
+     any further and the dome clears the TOP of the pill and reappears above
+     the bar. The fade covers the rest — the last sliver of housing and its
+     drop shadow — and it resolves before the slide does, so the eye reads a
+     camera sliding back out of the shadow rather than one materialising. */
+  @keyframes sfc-cam-peek {
+    0%,
+    7% {
+      transform: translateY(-64%);
+      opacity: 0;
+    }
+    13% {
+      opacity: 1;
+    }
+    17%,
+    63% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    67% {
+      opacity: 1;
+    }
+    73%,
+    100% {
+      transform: translateY(-64%);
+      opacity: 0;
+    }
+  }
+
+  @keyframes sfc-cam-beam {
+    0%,
+    13% {
+      opacity: 0;
+    }
+    22%,
+    60% {
+      opacity: var(--cam-beam-opacity);
+    }
+    66%,
+    100% {
+      opacity: 0;
+    }
+  }
+}
+
+
+/* ------------------------------------------------------------------
+   sfc-cta-park — the service truck parked on the CTA band
+   The branded pickup sits on the top-left corner of the "Get a same-day
+   quote" band, wheels resting on its edge, on every page that closes
+   with the banner.
+   ------------------------------------------------------------------ */
+@layer components {
+  .sfc-cta-park {
+    position: relative;
+
+    --truck-w: clamp(9rem, 28vw, 19rem);
+    /* The artwork is trimmed flush to the vehicle at 1000×547, so its rendered
+       height is the width × 0.547 — and all of that hangs above the band.
+       Reserve whatever the section's own padding doesn't already cover, so the
+       truck can never collide with the section above it. */
+    margin-top: max(
+      0px,
+      calc(var(--truck-w) * 0.547 - clamp(3rem, 8vw, 6rem) + 0.75rem)
+    );
+  }
+
+  .sfc-cta-park__truck {
+    position: absolute;
+    top: 0;
+    left: clamp(0.5rem, 4vw, 3rem);
+    width: var(--truck-w);
+    height: auto;
+    /* Parked ON the band rather than floating over it: the trim means the
+       tyres sit at the very bottom of the artwork, so lifting it by just
+       under its full height rests them on the band's top edge. */
+    transform: translateY(-98%);
+    /* `.sfc-band` is itself positioned, so without this it wins on DOM order
+       and paints over the tyres — the truck reads as sunk into the band
+       rather than parked on it. */
+    z-index: 1;
+    /* Hugs the vehicle's silhouette, which reads as a contact shadow where the
+       tyres meet the band. */
+    filter: drop-shadow(0 8px 12px rgb(0 0 0 / 0.3));
+    pointer-events: none;
+  }
+}

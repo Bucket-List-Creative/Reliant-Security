@@ -3,7 +3,6 @@ import {
   SERVICES_QUERY,
   STATS_QUERY,
   TESTIMONIALS_QUERY,
-  FAQS_QUERY,
   SITE_SETTINGS_QUERY,
   FEATURED_PROJECTS_QUERY,
   INDUSTRIES_QUERY,
@@ -12,7 +11,6 @@ import type {
   Service,
   Stat,
   Testimonial,
-  Faq,
   SiteSettings,
   ProjectListItem,
   IndustryListItem,
@@ -37,14 +35,13 @@ const LOCAL_PROJECT_IMAGES = new Map(
 );
 
 export default async function HomePage() {
-  const [services, stats, industries, projects, testimonials, faqs, settings] =
+  const [services, stats, industries, projects, testimonials, settings] =
     await Promise.all([
       sanityFetch({ query: SERVICES_QUERY }),
       sanityFetch({ query: STATS_QUERY }),
       sanityFetch({ query: INDUSTRIES_QUERY }),
       sanityFetch({ query: FEATURED_PROJECTS_QUERY }),
       sanityFetch({ query: TESTIMONIALS_QUERY }),
-      sanityFetch({ query: FAQS_QUERY }),
       sanityFetch({ query: SITE_SETTINGS_QUERY }),
     ]);
 
@@ -90,7 +87,7 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      <FaqAccordion faqs={faqs.data as Faq[]} />
+      <FaqAccordion ctaLabel="Request a Free Consultation" showServiceLink />
       <CtaBanner phone={phone} />
     </>
   );

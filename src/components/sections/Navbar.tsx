@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { ServiceIcon, type ServiceIconKey } from "@/components/ui/ServiceIcon";
 import { SERVICE_CATEGORIES } from "@/content/services";
+import { WatchCam } from "@/components/ui/WatchCam";
 
 /**
  * Dropdown entries use the shared line-icon set (Tabler, MIT-licensed) rather
@@ -171,6 +172,12 @@ export function Navbar({
       style={{ zIndex: "var(--z-navbar)" }}
     >
       <div className="sfc-container pt-4">
+        {/* Anchors the watch-cam to the pill's bottom-right corner. The camera
+            is deliberately the pill's PREVIOUS sibling: both are positioned
+            with an auto z-index, so the pill paints over the top of the
+            housing and the dome reads as bolted to the bar. */}
+        <div className="relative">
+          <WatchCam />
         {/*
           The pill deliberately has NO `overflow: hidden`. The dropdowns are
           absolutely positioned panels anchored to their trigger, so they need
@@ -318,6 +325,7 @@ export function Navbar({
               onMouseLeave={scheduleClose}
             />
           ))}
+          </div>
         </div>
 
         {/* Mobile sheet — capped and scrollable so long menus never trap the user */}
