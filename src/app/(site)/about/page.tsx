@@ -26,6 +26,7 @@ import { TrustBar } from "@/components/sections/TrustBar";
 import { PartnerGrid } from "@/components/sections/PartnerGrid";
 import { ProjectsStrip } from "@/components/sections/ProjectsStrip";
 import { Testimonials } from "@/components/sections/Testimonials";
+import { getGoogleReviews } from "@/lib/googleReviews";
 import { CtaBanner } from "@/components/sections/CtaBanner";
 import { PROJECTS } from "@/content/projects";
 import { publicAssetOrUndefined } from "@/lib/publicAssets";
@@ -37,6 +38,7 @@ import {
 } from "@/content/pages";
 import { PHOTOS } from "@/content/photos";
 import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
+import { VideoEmbed } from "@/components/ui/VideoEmbed";
 import { OwnerNote } from "@/components/sections/OwnerNote";
 
 export const metadata: Metadata = buildMetadata({
@@ -52,6 +54,23 @@ const LOCAL_PROJECT_IMAGES = new Map(
 
 /** Local fallback for the intro portrait; a Sanity upload takes priority. */
 const INTRO_PHOTO = publicAssetOrUndefined(PHOTOS.ownerPortrait.src);
+
+/**
+ * Alarm.com's own demo clip, shipped with the site rather than hosted.
+ *
+ * It is 7.8MB for six seconds — the source is a 1200×1200 master and there is
+ * no re-encode step in this repo — so `VideoEmbed` loads it with
+ * `preload="none"` behind a poster frame. Nothing but the poster is fetched
+ * until someone presses play. Re-encode it before ever setting it to autoplay.
+ *
+ * Both paths are checked so a missing file degrades to the component's
+ * placeholder instead of a broken player. Passing a YouTube or Vimeo `url`
+ * here later takes priority over the file.
+ */
+const ABOUT_VIDEO = {
+  file: publicAssetOrUndefined("/video/interactive-alarm.mp4"),
+  poster: publicAssetOrUndefined("/video/interactive-alarm-poster.webp"),
+};
 
 /**
  * ⚠️ Several statements below need Reliant's confirmation before launch:
@@ -94,6 +113,7 @@ export default async function AboutPage() {
   ]);
 
   const { data: pageData } = await sanityFetch({ query: ABOUT_PAGE_QUERY });
+  const googleReviews = await getGoogleReviews();
 
   const s = settings as SiteSettings | null;
   const page = pageData as AboutPageContent | null;
@@ -199,6 +219,47 @@ export default async function AboutPage() {
         </Container>
       </section>
 
+      {/* What the systems actually do, shown rather than described. The clip
+          is square, so it gets a 1:1 frame instead of the component's 16:9
+          default — cropping a square master to widescreen would cut the
+          notification banner the whole clip is built around. */}
+      <section className="sfc-section pt-0" id="see-it-working">
+        <Container>
+          <div className="grid items-center gap-10 lg:grid-cols-[1fr_0.8fr]">
+            <div className="max-w-xl">
+              <h2 className="text-3xl font-bold sm:text-4xl">
+                What it looks like day to day
+              </h2>
+              <div className="mt-4 space-y-4 text-lg leading-relaxed text-n-700">
+                <p>
+                  Most of what a monitored system does is quiet. A camera picks
+                  something up, the platform decides whether it matters, and
+                  your phone tells you — no siren, no phone call, just a
+                  notification with the clip attached.
+                </p>
+                <p>
+                  Below is a short demo from Alarm.com, one of the platforms we
+                  install on, showing a doorbell camera catching a delivery and
+                  flagging it in the app. The alerts that aren&apos;t deliveries
+                  — a door opening after hours, motion where nobody should be,
+                  a verified alarm — reach our monitoring center at the same
+                  time they reach you.
+                </p>
+              </div>
+            </div>
+
+            <VideoEmbed
+              url={page?.videoUrl}
+              file={ABOUT_VIDEO.file}
+              poster={ABOUT_VIDEO.poster}
+              title="Alarm.com doorbell camera detecting a package delivery"
+              ratio="1 / 1"
+              className="mx-auto max-w-[26rem]"
+            />
+          </div>
+        </Container>
+      </section>
+
       {/* A note from Reliant — editable in Sanity under Site settings */}
       <OwnerNote note={page?.ownerNote} />
 
@@ -247,6 +308,7 @@ export default async function AboutPage() {
       {/* Testimonials */}
       <Testimonials
         testimonials={testimonials as Testimonial[]}
+        google={googleReviews}
         heading="What our customers say"
       />
 

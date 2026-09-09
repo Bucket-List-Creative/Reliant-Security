@@ -38,6 +38,10 @@ export type SiteSettings = {
   bbbUrl?: string;
   angiesListUrl?: string;
   social?: SocialLink[];
+  /** Override for the built-in logo used in the navbar and footer. */
+  logo?: SanityImage;
+  /** Override for the vehicle on the "Get a same-day quote" banner. */
+  ctaImage?: SanityImage;
 };
 
 /** A short signed note from Reliant, shown on the About page. */
@@ -285,6 +289,8 @@ export type AboutPageContent = {
   differentiators?: SectionHeading & { items?: IconCard[] };
   customers?: SectionHeading & { items?: IconCard[] };
   ownerNote?: OwnerNote;
+  /** YouTube/Vimeo link that replaces the bundled clip. */
+  videoUrl?: string;
 };
 
 export type ServicesPageContent = {

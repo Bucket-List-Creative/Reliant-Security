@@ -74,3 +74,11 @@ public/Images/Services/*.MP4
 /public/Images/About Us/
 /public/Images/Alarm Systems/
 /public/Images/Services/
+
+# Same rule, newer batch: 25MB of service photography plus the original
+# 1200x1200 alarm clip. `scripts/process-service-images.mjs` derives the
+# web-sized WebP frames in public/Images/site/ from these, and the clip was
+# copied to public/video/ — those derivatives are what ship. Anything under
+# public/ is both committed AND deployed, so leaving the sources here would put
+# 25MB in history permanently and send it to the host on every build.
+/public/Images/New Services/

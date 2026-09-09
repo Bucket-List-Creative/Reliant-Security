@@ -33,6 +33,15 @@ const nextConfig: NextConfig = {
         hostname: "cdn.sanity.io",
         pathname: "/images/**",
       },
+      // Google review authors' profile photos. Attribution is a condition of
+      // showing Places data, and `unoptimized` above doesn't exempt a remote
+      // host from this allowlist — without the entry, next/image throws
+      // instead of rendering the avatar.
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        pathname: "/**",
+      },
     ],
   },
   // Surface Sanity fetch cache HIT/MISS while developing.

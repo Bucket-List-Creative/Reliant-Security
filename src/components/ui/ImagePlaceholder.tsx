@@ -29,6 +29,16 @@ type Props = {
   height?: number;
   sizes?: string;
   priority?: boolean;
+  /**
+   * `object-position` for local photography, e.g. `"right"`. Defaults to the
+   * browser's `50% 50%`. Set it where a centre crop would cut something that
+   * has to stay whole.
+   *
+   * Deliberately not applied to `image`: a Sanity asset carries its own
+   * hotspot and crop, set by whoever uploaded it, and biasing it from here
+   * would silently override that choice.
+   */
+  objectPosition?: string;
 };
 
 /**
@@ -51,6 +61,7 @@ export function ImagePlaceholder({
   height = 500,
   sizes,
   priority,
+  objectPosition,
 }: Props) {
   const frameClass = [
     "overflow-hidden rounded-[var(--radius-md)]",
@@ -89,6 +100,7 @@ export function ImagePlaceholder({
           sizes={sizes}
           priority={priority}
           className="h-full w-full object-cover"
+          style={objectPosition ? { objectPosition } : undefined}
         />
       </div>
     );

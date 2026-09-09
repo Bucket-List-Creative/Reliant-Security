@@ -26,6 +26,7 @@ import { ServiceDirectory } from "@/components/sections/ServiceDirectory";
 import { IndustryTabs } from "@/components/sections/IndustryTabs";
 import { ProjectsStrip } from "@/components/sections/ProjectsStrip";
 import { Testimonials } from "@/components/sections/Testimonials";
+import { getGoogleReviews } from "@/lib/googleReviews";
 import { FaqAccordion } from "@/components/sections/FaqAccordion";
 import { CtaBanner } from "@/components/sections/CtaBanner";
 import { PROJECTS } from "@/content/projects";
@@ -69,6 +70,10 @@ export default async function HomePage() {
       sanityFetch({ query: SITE_SETTINGS_QUERY }),
       sanityFetch({ query: HOME_PAGE_QUERY }),
     ]);
+
+  // Fetched alongside the CMS queries rather than inside the component, so the
+  // Places call overlaps the Sanity round-trips instead of following them.
+  const googleReviews = await getGoogleReviews();
 
   const s = settings.data as SiteSettings | null;
   const cms = page.data as HomePageContent | null;
@@ -132,6 +137,7 @@ export default async function HomePage() {
       />
       <Testimonials
         testimonials={testimonials.data as Testimonial[]}
+        google={googleReviews}
         heading={cms?.testimonials?.heading}
       />
 

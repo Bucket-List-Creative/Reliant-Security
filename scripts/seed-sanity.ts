@@ -22,7 +22,7 @@
  * published on the site, and the BBB profile lists a different municipality
  * (see the audit notes), so asserting one would risk an NAP conflict.
  */
-import { writeFileSync } from "node:fs";
+import { writeFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -64,6 +64,19 @@ const imageAsset = (publicPath: string, alt: string) => ({
   alt,
   _sanityAsset: `image@file://${join(PUBLIC_DIR, publicPath.replace(/^\//, ""))}`,
 });
+
+/**
+ * Same, but returns undefined when the file isn't on disk.
+ *
+ * Project photography arrives in batches and `src/content/projects.ts` names
+ * the paths before the files exist. A `_sanityAsset` pointing at a missing
+ * file fails the whole import, so anything optional has to be checked first.
+ */
+const imageAssetIfPresent = (publicPath: string | undefined, alt: string) => {
+  if (!publicPath) return undefined;
+  const abs = join(PUBLIC_DIR, publicPath.replace(/^\//, ""));
+  return existsSync(abs) ? imageAsset(publicPath, alt) : undefined;
+};
 
 const docs: Doc[] = [];
 
@@ -195,6 +208,16 @@ PROJECTS.forEach((p, i) => {
     featured: p.featured ? "featured" : "standard",
     publishedAt: SEED_PUBLISHED_AT,
     order: (i + 1) * 10,
+    // Photography that exists gets uploaded so the client can replace it in
+    // the Studio. Projects still awaiting a shoot (Lincoln County Fair) are
+    // simply left without, and the page falls back as before.
+    heroImage: imageAssetIfPresent(p.image, `${p.client} — project photograph`),
+    gallery: (p.gallery ?? [])
+      .map((g, gi) =>
+        imageAssetIfPresent(g, `${p.client} — project photograph ${gi + 1}`),
+      )
+      .filter(Boolean)
+      .map((img, gi) => ({ ...(img as object), _key: `g${i}-${gi}` })),
   });
 });
 

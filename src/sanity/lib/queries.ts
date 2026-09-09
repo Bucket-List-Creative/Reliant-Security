@@ -28,7 +28,9 @@ export const SITE_SETTINGS_QUERY = defineQuery(/* groq */ `
     googleReviewsUrl,
     bbbUrl,
     angiesListUrl,
-    social[]{ _key, platform, url }
+    social[]{ _key, platform, url },
+    logo{ ${imageFragment} },
+    ctaImage{ ${imageFragment} }
   }
 `);
 
@@ -345,7 +347,8 @@ export const ABOUT_PAGE_QUERY = defineQuery(/* groq */ `
       authorName,
       authorRole,
       photo{ ${imageFragment} }
-    }
+    },
+    videoUrl
   }
 `);
 
