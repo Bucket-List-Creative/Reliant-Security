@@ -10,8 +10,14 @@ import {
   IconArrowRight,
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/Button";
-import { ServiceIcon, type ServiceIconKey } from "@/components/ui/ServiceIcon";
+import {
+  ServiceIcon,
+  isServiceIconKey,
+  type ServiceIconKey,
+} from "@/components/ui/ServiceIcon";
+import type { NavigationContent } from "@/sanity/lib/types";
 import { SERVICE_CATEGORIES } from "@/content/services";
+import { NAV_DEFAULTS } from "@/content/pages";
 import { WatchCam } from "@/components/ui/WatchCam";
 
 /**
@@ -54,31 +60,25 @@ const SERVICES_COLUMNS: NavColumn[] = SERVICE_CATEGORIES.map((cat) => ({
 
 // Top-level nav is intentionally small. As new pages are built, add them to the
 // most appropriate dropdown group below rather than adding new top-level links.
-const NAV: NavItem[] = [
-  { label: "Services", href: "/services", columns: SERVICES_COLUMNS },
-  {
-    label: "Industries",
-    href: "/industries",
-    children: [
-      { label: "Residential", href: "/industries?segment=residential", iconKey: "home", desc: "Homes, custom homes & multi-family" },
-      { label: "Commercial", href: "/industries?segment=commercial", iconKey: "building", desc: "Offices, retail, healthcare & more" },
-      { label: "Industrial", href: "/industries?segment=industrial", iconKey: "factory", desc: "Plants, manufacturing & logistics" },
-      { label: "Government", href: "/industries?segment=government", iconKey: "government", desc: "Federal, State, Municipal & DoD" },
-      { label: "All industries", href: "/industries", iconKey: "grid", desc: "Browse every sector" },
-    ],
-  },
-  {
-    label: "About",
-    href: "/about",
-    children: [
-      { label: "About Us", href: "/about", iconKey: "team", desc: "Our story, team & partners" },
-      { label: "Projects", href: "/projects", iconKey: "projects", desc: "Real installations we've delivered" },
-      { label: "Resources", href: "/blog", iconKey: "resources", desc: "Guides, insights & industry news" },
-    ],
-  },
-  { label: "Pricing", href: "/pricing" },
-  { label: "Contact", href: "/contact" },
-];
+/** Built-in nav, shared with the seed script so the Studio starts in sync. */
+const NAV: NavItem[] = NAV_DEFAULTS.primary.map((item) =>
+  item.href === "/services"
+    ? { label: item.label, href: item.href, columns: SERVICES_COLUMNS }
+    : {
+        label: item.label,
+        href: item.href,
+        ...(item.children?.length
+          ? {
+              children: item.children.map((c) => ({
+                label: c.label,
+                href: c.href,
+                desc: c.desc,
+                iconKey: isServiceIconKey(c.iconKey) ? c.iconKey : undefined,
+              })),
+            }
+          : {}),
+      },
+);
 
 /** Grace period before a hover-opened menu closes, so a diagonal mouse path
  *  from the trigger to the panel doesn't dismiss it mid-move. */
@@ -90,13 +90,50 @@ function Chevron({ className = "" }: { className?: string }) {
   );
 }
 
+/**
+ * Merge the Navigation document over the built-in nav.
+ *
+ * A CMS list replaces the top-level items wholesale — partial overrides would
+ * make it impossible to remove an item. The Services item keeps its generated
+ * mega-menu whatever the CMS says, so the menu can't drift out of step with
+ * the services that actually exist.
+ */
+function resolveNav(primary?: NavigationContent["primary"]): NavItem[] {
+  const usable = primary?.filter((i) => i.label && i.href) ?? [];
+  if (!usable.length) return NAV;
+
+  return usable.map((item) => {
+    if (item.href === "/services") {
+      return { label: item.label, href: item.href, columns: SERVICES_COLUMNS };
+    }
+    const children = item.children?.filter((c) => c.label && c.href) ?? [];
+    return {
+      label: item.label,
+      href: item.href,
+      ...(children.length
+        ? {
+            children: children.map((c) => ({
+              label: c.label,
+              href: c.href,
+              desc: c.desc,
+              iconKey: isServiceIconKey(c.iconKey) ? c.iconKey : undefined,
+            })),
+          }
+        : {}),
+    };
+  });
+}
+
 export function Navbar({
   siteTitle = "Reliant Security",
   emergencyPhone,
+  navigation,
 }: {
   siteTitle?: string;
   emergencyPhone?: string;
+  navigation?: NavigationContent | null;
 }) {
+  const items = resolveNav(navigation?.primary);
   const [active, setActive] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>(null);
@@ -163,7 +200,9 @@ export function Navbar({
   }, [open]);
 
   const ctaHref = emergencyPhone ? `tel:${emergencyPhone}` : "/contact";
-  const ctaLabel = emergencyPhone ? `Call ${emergencyPhone}` : "Get a Free Quote";
+  const ctaLabel =
+    navigation?.ctaLabel ||
+    (emergencyPhone ? `Call ${emergencyPhone}` : NAV_DEFAULTS.ctaLabel);
 
   return (
     <header
@@ -211,7 +250,7 @@ export function Navbar({
 
             {/* Desktop links */}
             <ul className="hidden items-center gap-1 min-[880px]:flex">
-              {NAV.map((item) => {
+              {items.map((item) => {
                 const hasMenu = Boolean(item.children || item.columns);
                 const isOpen = active === item.label;
                 const base =
@@ -314,7 +353,7 @@ export function Navbar({
 
           {/* Wide mega-menus span the pill, so they stay inside the viewport
               at every desktop width regardless of where their trigger sits. */}
-          {NAV.filter((i) => i.columns).map((item) => (
+          {items.filter((i) => i.columns).map((item) => (
             <DropdownPanel
               key={item.label}
               id={`nav-panel-${item.label.toLowerCase()}`}
@@ -336,7 +375,7 @@ export function Navbar({
             style={{ boxShadow: "var(--shadow-overlay)" }}
           >
             <ul className="flex flex-col gap-1">
-              {NAV.map((item) => {
+              {items.map((item) => {
                 const hasMenu = Boolean(item.children || item.columns);
                 const sectionOpen = openSection === item.label;
                 return (

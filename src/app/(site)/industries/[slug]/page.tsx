@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
+import { breadcrumbJsonLd, jsonLdGraph } from "@/lib/schema";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { sanityFetch } from "@/sanity/lib/live";
@@ -115,10 +117,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const ind = await getIndustry(slug);
   if (!ind) return {};
-  return {
+  return buildMetadata({
     title: `${ind.name} Security`,
     description: ind.summary,
-  };
+    path: `/industries/${slug}`,
+  });
 }
 
 export default async function IndustryPage({ params }: Props) {
@@ -126,17 +129,38 @@ export default async function IndustryPage({ params }: Props) {
   const ind = await getIndustry(slug);
   if (!ind) notFound();
 
+  const jsonLd = jsonLdGraph(
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Industries", path: "/industries" },
+      { name: ind.name, path: `/industries/${slug}` },
+    ]),
+  );
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <section className="sfc-section pt-12">
         <Container>
           <div className="mx-auto max-w-4xl">
-            <Link
-              href="/industries"
-              className="text-sm text-n-500 transition-colors hover:text-ink"
-            >
-              ← All industries
-            </Link>
+            <nav aria-label="Breadcrumb" className="text-sm text-n-500">
+              <Link href="/" className="hover:text-ink">
+                Home
+              </Link>
+              <span className="mx-2" aria-hidden>
+                /
+              </span>
+              <Link href="/industries" className="hover:text-ink">
+                Industries
+              </Link>
+              <span className="mx-2" aria-hidden>
+                /
+              </span>
+              <span className="text-n-700">{ind.name}</span>
+            </nav>
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <span className="sfc-card__icon" aria-hidden>

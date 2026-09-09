@@ -19,6 +19,15 @@ export const post = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
+      name: "seoTitle",
+      title: "SEO title",
+      type: "string",
+      description:
+        "Optional shorter title for search results and social cards. Use when the headline runs long — the page heading is unaffected. Aim for under 60 characters; the site name is appended automatically.",
+      validation: (rule) =>
+        rule.max(60).warning("Titles over 60 characters get truncated"),
+    }),
+    defineField({
       name: "excerpt",
       type: "text",
       rows: 3,

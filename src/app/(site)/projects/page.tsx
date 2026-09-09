@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { sanityFetch } from "@/sanity/lib/live";
 import { PROJECTS_QUERY, SITE_SETTINGS_QUERY } from "@/sanity/lib/queries";
@@ -11,11 +12,12 @@ import { PROJECTS } from "@/content/projects";
 import { SEGMENT_LABELS, type IndustrySegment } from "@/content/industries";
 import { publicAssetOrUndefined } from "@/lib/publicAssets";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildMetadata({
   title: "Projects",
   description:
     "Real installations delivered by Reliant Security — video surveillance, access control, structured cabling and fiber across industrial, commercial, multi-family, and residential sites.",
-};
+  path: "/projects",
+});
 
 const FILTERS: { label: string; value: "" | IndustrySegment }[] = [
   { label: "All", value: "" },

@@ -16,10 +16,17 @@ const nextConfig: NextConfig = {
     // On this exFAT drive, macOS drops `._*` AppleDouble sidecars there and the
     // optimizer reads them back instead of the real image, serving corrupt
     // bytes ("AppleDouble encoded Macintosh file") that browsers can't decode.
-    // Disabling optimization serves originals directly — and it costs us
-    // nothing here: local logos are already sized, and Sanity images are
-    // optimized by Sanity's CDN via the `urlFor()` builder.
-    unoptimized: true,
+    //
+    // That is a macOS-on-exFAT problem, not a production one: a Linux host
+    // never writes those sidecars. Scoping the workaround to development means
+    // local `public/` images are actually optimized in production instead of
+    // being served at full size to phones.
+    //
+    // If a deploy ever serves corrupt images, set this back to `true` and the
+    // originals are served directly again — nothing else depends on it.
+    // Sanity images are unaffected either way: `SanityImage` marks them
+    // `unoptimized` because Sanity's CDN has already done the work.
+    unoptimized: process.env.NODE_ENV === "development",
     remotePatterns: [
       {
         protocol: "https",
@@ -46,6 +53,14 @@ const nextConfig: NextConfig = {
       {
         source: "/case-studies/:slug",
         destination: "/projects/:slug",
+        permanent: true,
+      },
+      // Two back-to-school posts competed for the same query. The thinner one
+      // was merged into the other; this preserves any link equity it had.
+      {
+        source:
+          "/blog/back-to-school-security-tips-keep-your-st-louis-home-and-business-safe-this-fall",
+        destination: "/blog/back-to-school-home-security-tips-for-parents",
         permanent: true,
       },
     ];

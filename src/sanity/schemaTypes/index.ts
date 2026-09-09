@@ -2,6 +2,12 @@ import { type SchemaTypeDefinition } from "sanity";
 
 // Objects
 import { blockContent } from "./objects/blockContent";
+import {
+  ctaLink,
+  sectionHeading,
+  iconCard,
+  navItem,
+} from "./objects/pageParts";
 
 // Documents
 import { author } from "./documents/author";
@@ -15,12 +21,23 @@ import { testimonial } from "./documents/testimonial";
 import { partner } from "./documents/partner";
 import { faq } from "./documents/faq";
 import { stat } from "./documents/stat";
+import { location } from "./documents/location";
+import { legalPage } from "./documents/legalPage";
+import { resource } from "./documents/resource";
+import { homePage } from "./documents/homePage";
+import { aboutPage } from "./documents/aboutPage";
+import { servicesPage } from "./documents/servicesPage";
+import { navigation } from "./documents/navigation";
 import { siteSettings } from "./documents/siteSettings";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
     // Objects
     blockContent,
+    ctaLink,
+    sectionHeading,
+    iconCard,
+    navItem,
     // Documents
     service,
     industry,
@@ -33,6 +50,13 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     post,
     author,
     category,
+    resource,
+    location,
+    legalPage,
+    homePage,
+    aboutPage,
+    servicesPage,
+    navigation,
     siteSettings,
   ],
 };

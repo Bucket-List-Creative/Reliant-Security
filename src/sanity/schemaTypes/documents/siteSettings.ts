@@ -52,13 +52,6 @@ export const siteSettings = defineType({
       description: "e.g. “Mon – Sun: 9:00 AM – 9:00 PM”.",
     }),
     defineField({
-      name: "aboutVideoUrl",
-      title: "About video URL",
-      type: "url",
-      description: "A YouTube or Vimeo link — embedded on the About page.",
-      validation: (rule) => rule.uri({ scheme: ["http", "https"] }),
-    }),
-    defineField({
       name: "googleReviewsUrl",
       title: "Google reviews URL",
       type: "url",

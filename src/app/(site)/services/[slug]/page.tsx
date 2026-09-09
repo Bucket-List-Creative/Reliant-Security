@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { IconCheck, IconArrowRight } from "@tabler/icons-react";
 import { notFound } from "next/navigation";
@@ -24,6 +25,12 @@ import {
   type ServiceFaq,
 } from "@/content/services";
 import { SITE_URL, SITE_NAME } from "@/config/site";
+import {
+  SERVICE_PHOTOS,
+  DEFAULT_SERVICE_PHOTO,
+  type Photo,
+} from "@/content/photos";
+import { publicAssetExists } from "@/lib/publicAssets";
 import { Container } from "@/components/ui/Container";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -61,6 +68,17 @@ type ResolvedService = {
   heroImage?: SanityImage;
   body?: Service["body"];
 };
+
+/**
+ * Local service photo. Every taxonomy slug is mapped; anything else (a
+ * CMS-only service) falls back to brand photography, so a card never drops to
+ * the placeholder well. The disk check keeps a missing file from rendering
+ * broken.
+ */
+function servicePhoto(slug: string): Photo | undefined {
+  const photo = SERVICE_PHOTOS[slug] ?? DEFAULT_SERVICE_PHOTO;
+  return publicAssetExists(photo.src) ? photo : undefined;
+}
 
 function categoryTitleForSlug(slug?: string): string | undefined {
   return SERVICE_CATEGORIES.find((c) => c.slug === slug)?.title;
@@ -128,22 +146,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!svc) return {};
 
   const canonical = `/services/${slug}`;
+  // Sanity crops to the 1.91:1 social ratio; the local fallback is the 3:2
+  // file we ship, declared at its real size so scrapers don't mis-scale it.
   const ogImage = svc.heroImage?.asset
-    ? urlFor(svc.heroImage).width(1200).height(630).fit("crop").url()
-    : undefined;
+    ? {
+        url: urlFor(svc.heroImage).width(1200).height(630).fit("crop").url(),
+        width: 1200,
+        height: 630,
+      }
+    : servicePhoto(slug)
+      ? { url: servicePhoto(slug)!.src, width: 1500, height: 1000 }
+      : undefined;
 
-  return {
+  return buildMetadata({
     title: svc.title,
     description: svc.metaDescription,
-    alternates: { canonical },
-    openGraph: {
-      title: `${svc.title} · ${SITE_NAME}`,
-      description: svc.metaDescription,
-      url: canonical,
-      type: "website",
-      images: ogImage ? [{ url: ogImage, width: 1200, height: 630 }] : undefined,
-    },
-  };
+    path: canonical,
+    ...(ogImage
+      ? {
+          image: {
+            url: ogImage.url,
+            width: ogImage.width,
+            height: ogImage.height,
+            alt: svc.title,
+          },
+        }
+      : {}),
+  });
 }
 
 export default async function ServiceDetailPage({ params }: Props) {
@@ -158,6 +187,7 @@ export default async function ServiceDetailPage({ params }: Props) {
 
   const phone = (settings as SiteSettings | null)?.phone;
   const related = getRelatedServices(slug, 3);
+  const photo = servicePhoto(slug);
   const canonical = `${SITE_URL}/services/${slug}`;
 
   // ---- Structured data (SEO / answer engines) ----
@@ -281,7 +311,9 @@ export default async function ServiceDetailPage({ params }: Props) {
 
             <ImagePlaceholder
               image={svc.heroImage}
-              ratio="4 / 3"
+              src={photo?.src}
+              alt={photo?.alt}
+              aspectClassName="aspect-[16/10] lg:aspect-[4/3]"
               label={`${svc.title} image`}
               className="w-full"
               width={880}

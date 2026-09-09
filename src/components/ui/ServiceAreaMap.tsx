@@ -47,50 +47,14 @@ type Props = {
   showSearch?: boolean;
   showFilter?: boolean;
   showSidebar?: boolean;
-  showBoundary?: boolean;
   /**
-   * `"all"` drops a pin on every community. `"home"` draws the same
-   * service-area outline but marks only Reliant's O'Fallon home location —
-   * a cleaner read for the home page, where the dense pin cluster was noise.
+   * `"all"` drops a pin on every community. `"home"` marks only Reliant's
+   * O'Fallon home location — a cleaner read for the home page, where the
+   * dense pin cluster was noise.
    */
   pins?: "all" | "home";
   className?: string;
 };
-
-/** Convex hull (Andrew's monotone chain) → ordered [lat,lng] ring. */
-function convexHull(pts: ServiceLocation[]): [number, number][] {
-  if (pts.length < 3) return [];
-  const xy = pts
-    .map((p) => [p.lng, p.lat] as [number, number])
-    .sort((a, b) => a[0] - b[0] || a[1] - b[1]);
-  const cross = (
-    o: [number, number],
-    a: [number, number],
-    b: [number, number],
-  ) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
-  const lower: [number, number][] = [];
-  for (const p of xy) {
-    while (
-      lower.length >= 2 &&
-      cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0
-    )
-      lower.pop();
-    lower.push(p);
-  }
-  const upper: [number, number][] = [];
-  for (let i = xy.length - 1; i >= 0; i--) {
-    const p = xy[i];
-    while (
-      upper.length >= 2 &&
-      cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0
-    )
-      upper.pop();
-    upper.push(p);
-  }
-  lower.pop();
-  upper.pop();
-  return lower.concat(upper).map(([lng, lat]) => [lat, lng] as [number, number]);
-}
 
 /** Shorten a county name for a filter pill, e.g. "St. Charles County" → "St. Charles Co." */
 function shortRegion(r: ServiceRegion): string {
@@ -103,13 +67,11 @@ export function ServiceAreaMap({
   showSearch = true,
   showFilter = true,
   showSidebar = true,
-  showBoundary = true,
   pins = "all",
   className,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
-  const polygonRef = useRef<google.maps.Polygon | null>(null);
   const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
   const markerByName = useRef<Map<string, google.maps.Marker>>(new Map());
 
@@ -196,18 +158,17 @@ export function ServiceAreaMap({
     };
   }, []);
 
-  // ---- (Re)draw markers + boundary when the visible set changes ----
+  // ---- (Re)draw markers when the visible set changes ----
   useEffect(() => {
     const map = mapRef.current;
     if (!ready || !map) return;
 
     markerByName.current.forEach((marker) => marker.setMap(null));
     markerByName.current.clear();
-    polygonRef.current?.setMap(null);
-    polygonRef.current = null;
-
-    // The boundary is always computed from every visible community; only the
-    // pins differ between modes.
+    // Reliant travels well beyond any drawable outline — commercial,
+    // industrial, and government work runs multi-site across the US — so the
+    // map shows pins only. A polygon around the metro communities would
+    // understate the actual reach.
     const pinned = pins === "home" ? [HOME_BASE] : visible;
 
     pinned.forEach((loc) => {
@@ -228,23 +189,8 @@ export function ServiceAreaMap({
 
     const bounds = new google.maps.LatLngBounds();
     visible.forEach((loc) => bounds.extend({ lat: loc.lat, lng: loc.lng }));
-    if (showBoundary) {
-      const hull = convexHull(visible);
-      if (hull.length >= 3) {
-        polygonRef.current = new google.maps.Polygon({
-          map,
-          paths: hull.map(([lat, lng]) => ({ lat, lng })),
-          strokeColor: MAP_CONFIG.colors.boundary,
-          strokeWeight: 3,
-          strokeOpacity: 0.9,
-          fillColor: MAP_CONFIG.colors.primary,
-          fillOpacity: 0.1,
-          clickable: false,
-        });
-      }
-    }
     if (!bounds.isEmpty()) map.fitBounds(bounds, 32);
-  }, [ready, visible, showBoundary, pins]);
+  }, [ready, visible, pins]);
 
   // ---- Reflect the active selection on the marker ----
   useEffect(() => {

@@ -34,11 +34,19 @@ export type SiteSettings = {
   email?: string;
   address?: string;
   hours?: string;
-  aboutVideoUrl?: string;
   googleReviewsUrl?: string;
   bbbUrl?: string;
   angiesListUrl?: string;
   social?: SocialLink[];
+};
+
+/** A short signed note from Reliant, shown on the About page. */
+export type OwnerNote = {
+  heading?: string;
+  body?: string[];
+  authorName?: string;
+  authorRole?: string;
+  photo?: SanityImage;
 };
 
 export type Partner = {
@@ -134,6 +142,7 @@ export type PostCategory = {
 export type PostListItem = {
   _id: string;
   title: string;
+  seoTitle?: string;
   slug: string;
   excerpt?: string;
   publishedAt: string;
@@ -206,4 +215,95 @@ export type Industry = IndustryListItem & {
   threats?: IndustryPoint[];
   solutions?: IndustryPoint[];
   services?: Pick<Service, "_id" | "title" | "slug" | "icon" | "summary">[];
+};
+
+export type Resource = {
+  _id: string;
+  title: string;
+  slug: string;
+  kind?: "guide" | "checklist" | "spec" | "faq" | "link";
+  summary?: string;
+  url?: string;
+  fileUrl?: string;
+  image?: SanityImage;
+};
+
+export type LocationDoc = {
+  _id: string;
+  city: string;
+  slug: string;
+  heading?: string;
+  intro?: Post["body"];
+  body?: Post["body"];
+  metaTitle?: string;
+  metaDescription?: string;
+  heroImage?: SanityImage;
+};
+
+export type LegalPage = {
+  _id: string;
+  title: string;
+  slug: string;
+  intro?: string;
+  body?: Post["body"];
+  updatedAt?: string;
+};
+
+/* ---- Page copy singletons ---- */
+
+export type CtaLink = { label?: string; href?: string };
+
+export type SectionHeading = { heading?: string; subheading?: string };
+
+export type IconCard = {
+  _key?: string;
+  title?: string;
+  description?: string;
+  iconKey?: string;
+  href?: string;
+};
+
+export type HomePageContent = {
+  eyebrow?: string;
+  title?: string;
+  subtitle?: string;
+  primaryCta?: CtaLink;
+  secondaryCta?: CtaLink;
+  capabilities?: SectionHeading & { items?: IconCard[] };
+  serviceDirectory?: SectionHeading;
+  industries?: SectionHeading;
+  projects?: SectionHeading;
+  testimonials?: SectionHeading;
+  serviceArea?: SectionHeading;
+};
+
+export type AboutPageContent = {
+  badge?: string;
+  heading?: string;
+  intro?: string[];
+  introImage?: SanityImage;
+  differentiators?: SectionHeading & { items?: IconCard[] };
+  customers?: SectionHeading & { items?: IconCard[] };
+  ownerNote?: OwnerNote;
+};
+
+export type ServicesPageContent = {
+  badge?: string;
+  heading?: string;
+  intro?: string;
+  heroImage?: SanityImage;
+};
+
+export type NavChild = {
+  _key?: string;
+  label: string;
+  href: string;
+  desc?: string;
+  iconKey?: string;
+};
+
+export type NavigationContent = {
+  ctaLabel?: string;
+  primary?: { _key?: string; label: string; href: string; children?: NavChild[] }[];
+  footerLinks?: { _key?: string; label: string; href: string }[];
 };
