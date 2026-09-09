@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { sanityFetch } from "@/sanity/lib/live";
 import { INDUSTRIES_QUERY, SITE_SETTINGS_QUERY } from "@/sanity/lib/queries";
@@ -13,11 +14,12 @@ import {
   type IndustrySegment,
 } from "@/content/industries";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildMetadata({
   title: "Industries",
   description:
     "Security and low-voltage systems for residential, custom homes, multi-family, commercial, industrial, and government facilities — from single-family alarms to Federal and DoD projects.",
-};
+  path: "/industries",
+});
 
 /** Taxonomy defaults, shown until matching `industry` documents exist. */
 const TAXONOMY_ITEMS: IndustryListItem[] = INDUSTRIES.map((i) => ({

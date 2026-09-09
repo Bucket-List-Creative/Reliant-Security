@@ -2,19 +2,20 @@ import Link from "next/link";
 import Image from "next/image";
 import { Container } from "@/components/ui/Container";
 import { PreferredSourceButton } from "@/components/sections/PreferredSourceButton";
-import type { SiteSettings } from "@/sanity/lib/types";
+import { NAV_DEFAULTS } from "@/content/pages";
+import type { SiteSettings, NavigationContent } from "@/sanity/lib/types";
 
-const SITEMAP = [
-  { href: "/services", label: "Services" },
-  { href: "/industries", label: "Industries" },
-  { href: "/projects", label: "Projects" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/blog", label: "Resources" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
-];
-
-export function Footer({ settings }: { settings?: SiteSettings | null }) {
+export function Footer({
+  settings,
+  navigation,
+}: {
+  settings?: SiteSettings | null;
+  navigation?: NavigationContent | null;
+}) {
+  // A CMS list replaces the built-in footer links entirely.
+  const links =
+    navigation?.footerLinks?.filter((l) => l.label && l.href) ?? [];
+  const sitemap = links.length ? links : NAV_DEFAULTS.footerLinks;
   const title = settings?.title ?? "Reliant Security";
   const tagline =
     settings?.tagline ??
@@ -52,7 +53,7 @@ export function Footer({ settings }: { settings?: SiteSettings | null }) {
               Company
             </h3>
             <ul className="space-y-2">
-              {SITEMAP.map((item) => (
+              {sitemap.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 import { sanityFetch } from "@/sanity/lib/live";
 import { PLANS_QUERY } from "@/sanity/lib/queries";
 import type { Plan } from "@/sanity/lib/types";
@@ -9,11 +10,12 @@ import { FaqAccordion } from "@/components/sections/FaqAccordion";
 
 import { PRICING_FAQS } from "@/content/faqs";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildMetadata({
   title: "Pricing",
   description:
     "Straightforward professional monitoring plans for homes and small businesses, plus custom-designed systems for commercial, industrial, and government facilities.",
-};
+  path: "/pricing",
+});
 
 export default async function PricingPage() {
   const { data: plans } = await sanityFetch({ query: PLANS_QUERY });

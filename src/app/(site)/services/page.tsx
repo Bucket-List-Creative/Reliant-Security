@@ -1,9 +1,19 @@
 import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { IconCheck, IconArrowRight } from "@tabler/icons-react";
 import { sanityFetch } from "@/sanity/lib/live";
-import { SERVICES_QUERY, SITE_SETTINGS_QUERY } from "@/sanity/lib/queries";
-import type { Service, SiteSettings, SanityImage } from "@/sanity/lib/types";
+import {
+  SERVICES_QUERY,
+  SITE_SETTINGS_QUERY,
+  SERVICES_PAGE_QUERY,
+} from "@/sanity/lib/queries";
+import type {
+  Service,
+  SiteSettings,
+  SanityImage,
+  ServicesPageContent,
+} from "@/sanity/lib/types";
 import { Container } from "@/components/ui/Container";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -15,12 +25,21 @@ import {
 } from "@/components/ui/ServiceIcon";
 import { CtaBanner } from "@/components/sections/CtaBanner";
 import { SERVICE_CATEGORIES } from "@/content/services";
+import { SERVICES_PAGE_DEFAULTS } from "@/content/pages";
+import {
+  PHOTOS,
+  SERVICE_PHOTOS,
+  DEFAULT_SERVICE_PHOTO,
+  type Photo,
+} from "@/content/photos";
+import { publicAssetExists } from "@/lib/publicAssets";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildMetadata({
   title: "Services",
   description:
     "Alarm systems, video surveillance, smart home & access control, network cabling, cyber security, and managed IT from Reliant Security.",
-};
+  path: "/services",
+});
 
 /* ------------------------------------------------------------------ */
 /*  Merge the built-in taxonomy with any Sanity `service` documents.   */
@@ -36,6 +55,8 @@ type DisplayService = {
   summary: string;
   features: string[];
   heroImage?: SanityImage;
+  /** Local photography, used when the CMS has no `heroImage`. */
+  photo?: Photo;
 };
 
 type DisplayCategory = {
@@ -45,6 +66,17 @@ type DisplayCategory = {
   blurb: string;
   services: DisplayService[];
 };
+
+/**
+ * Local service photo. Every taxonomy slug is mapped; anything else (a
+ * CMS-only service) falls back to brand photography, so a card never drops to
+ * the placeholder well. The disk check keeps a missing file from rendering
+ * broken.
+ */
+function servicePhoto(slug: string): Photo | undefined {
+  const photo = SERVICE_PHOTOS[slug] ?? DEFAULT_SERVICE_PHOTO;
+  return publicAssetExists(photo.src) ? photo : undefined;
+}
 
 function resolveIconKey(
   sanityKey: string | undefined,
@@ -73,6 +105,7 @@ function buildCategories(sanity: Service[]): DisplayCategory[] {
         summary: cms?.summary || svc.summary,
         features: cms?.features?.length ? cms.features : svc.features,
         heroImage: cms?.heroImage,
+        photo: servicePhoto(svc.slug),
       };
     }),
   }));
@@ -93,6 +126,7 @@ function buildCategories(sanity: Service[]): DisplayCategory[] {
       summary: s.summary,
       features: s.features ?? [],
       heroImage: s.heroImage,
+      photo: servicePhoto(s.slug),
     });
   }
 
@@ -111,6 +145,11 @@ function ServiceCard({ service }: { service: DisplayService }) {
       <div className="relative">
         <ImagePlaceholder
           image={service.heroImage}
+          src={service.photo?.src}
+          alt={service.photo?.alt}
+          aspectClassName="aspect-[16/10]"
+          width={720}
+          height={450}
           sizes="(min-width: 1024px) 540px, (min-width: 640px) 45vw, 90vw"
         />
         <span
@@ -150,13 +189,20 @@ function ServiceCard({ service }: { service: DisplayService }) {
 }
 
 export default async function ServicesPage() {
-  const [{ data: services }, { data: settings }] = await Promise.all([
-    sanityFetch({ query: SERVICES_QUERY }),
-    sanityFetch({ query: SITE_SETTINGS_QUERY }),
-  ]);
+  const [{ data: services }, { data: settings }, { data: pageData }] =
+    await Promise.all([
+      sanityFetch({ query: SERVICES_QUERY }),
+      sanityFetch({ query: SITE_SETTINGS_QUERY }),
+      sanityFetch({ query: SERVICES_PAGE_QUERY }),
+    ]);
+
+  const page = pageData as ServicesPageContent | null;
 
   const categories = buildCategories((services as Service[]) ?? []);
   const phone = (settings as SiteSettings | null)?.phone;
+  const heroPhoto = publicAssetExists(PHOTOS.truckWide.src)
+    ? PHOTOS.truckWide
+    : undefined;
 
   return (
     <>
@@ -165,16 +211,12 @@ export default async function ServicesPage() {
         <Container>
           <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="max-w-2xl">
-              <Badge className="mb-5">Our services</Badge>
+              <Badge className="mb-5">{page?.badge || SERVICES_PAGE_DEFAULTS.badge}</Badge>
               <h1 className="text-4xl font-bold sm:text-5xl">
-                Protection for every corner of your world
+                {page?.heading || SERVICES_PAGE_DEFAULTS.heading}
               </h1>
               <p className="mt-5 text-lg text-n-700">
-                From a single smart lock to surveillance, access control, and
-                fiber across an industrial campus, we design, install, and
-                support security and low-voltage systems that fit — backed by
-                24/7 professional monitoring and a local team that answers the
-                phone.
+                {page?.intro || SERVICES_PAGE_DEFAULTS.intro}
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Button href="/contact" variant="primary">
@@ -188,9 +230,14 @@ export default async function ServicesPage() {
               </div>
             </div>
             <ImagePlaceholder
-              ratio="4 / 3"
+              image={page?.heroImage}
+              src={heroPhoto?.src}
+              alt={heroPhoto?.alt}
+              aspectClassName="aspect-[16/10] lg:aspect-[4/3]"
               label="Hero image"
               className="w-full"
+              width={960}
+              height={720}
               priority
               sizes="(min-width: 1024px) 480px, 100vw"
             />

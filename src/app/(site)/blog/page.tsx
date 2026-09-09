@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { sanityFetch } from "@/sanity/lib/live";
 import { POSTS_QUERY } from "@/sanity/lib/queries";
@@ -8,12 +9,64 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { SanityImage } from "@/components/ui/SanityImage";
 import { PreferredSourceButton } from "@/components/sections/PreferredSourceButton";
+import { POSTS, RETIRED_POST_SLUGS } from "@/content/posts";
 
-export const metadata: Metadata = {
-  title: "Resources",
+export const metadata: Metadata = buildMetadata({
+  title: "Blog",
   description:
     "Guides, buying advice, and industry insight on security, surveillance, access control, structured cabling, and monitoring — for homeowners, businesses, and facility managers.",
+  path: "/blog",
+});
+
+/**
+ * A card's worth of post, from either source. Posts carried over from the
+ * previous site fill the list until the same slug exists in Sanity, at which
+ * point the CMS version replaces it.
+ */
+type Entry = {
+  key: string;
+  slug: string;
+  title: string;
+  excerpt?: string;
+  publishedAt?: string;
+  authorName?: string;
+  category?: string;
+  image?: PostListItem["mainImage"];
 };
+
+function mergePosts(cms: PostListItem[]): Entry[] {
+  const bySlug = new Map<string, Entry>();
+
+  for (const p of POSTS) {
+    bySlug.set(p.slug, {
+      key: p.slug,
+      slug: p.slug,
+      title: p.title,
+      excerpt: p.excerpt,
+      publishedAt: p.publishedAt,
+      authorName: p.author,
+      category: p.category,
+    });
+  }
+
+  for (const p of cms) {
+    bySlug.set(p.slug, {
+      key: p._id,
+      slug: p.slug,
+      title: p.title,
+      excerpt: p.excerpt,
+      publishedAt: p.publishedAt,
+      authorName: p.author?.name,
+      image: p.mainImage,
+    });
+  }
+
+  for (const slug of RETIRED_POST_SLUGS) bySlug.delete(slug);
+
+  return [...bySlug.values()].sort((a, b) =>
+    (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""),
+  );
+}
 
 function formatDate(iso?: string) {
   if (!iso) return "";
@@ -26,13 +79,13 @@ function formatDate(iso?: string) {
 
 export default async function BlogIndexPage() {
   const { data } = await sanityFetch({ query: POSTS_QUERY });
-  const posts = (data as PostListItem[]) ?? [];
+  const posts = mergePosts((data as PostListItem[]) ?? []);
 
   return (
     <section className="sfc-section pt-12">
       <Container>
         <div className="mb-12 max-w-2xl">
-          <Badge className="mb-5">Resources</Badge>
+          <Badge className="mb-5">Blog</Badge>
           <h1 className="text-4xl font-bold sm:text-5xl">
             Guides &amp; security insights
           </h1>
@@ -67,22 +120,25 @@ export default async function BlogIndexPage() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {posts.map((post) => (
-              <Link key={post._id} href={`/blog/${post.slug}`} className="block">
+              <Link key={post.key} href={`/blog/${post.slug}`} className="block">
                 <Card interactive className="flex h-full flex-col overflow-hidden">
-                  {post.mainImage?.asset && (
+                  {post.image?.asset && (
                     <div className="-mx-7 -mt-7 mb-5">
                       <SanityImage
-                        value={post.mainImage}
+                        value={post.image}
                         width={640}
-                        height={380}
-                        className="h-48 w-full object-cover"
+                        height={400}
+                        className="aspect-[16/10] w-full object-cover"
                         sizes="(min-width: 1024px) 380px, 100vw"
                       />
                     </div>
                   )}
+                  <div className="mb-2 flex flex-wrap items-center gap-2">
+                    {post.category && <Badge>{post.category}</Badge>}
+                  </div>
                   <div className="mb-2 text-sm text-n-500">
                     {formatDate(post.publishedAt)}
-                    {post.author?.name ? ` · ${post.author.name}` : ""}
+                    {post.authorName ? ` · ${post.authorName}` : ""}
                   </div>
                   <h2 className="text-xl font-semibold">{post.title}</h2>
                   {post.excerpt && (

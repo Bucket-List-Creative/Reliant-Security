@@ -4,7 +4,7 @@
  * The map (see `src/components/ui/ServiceAreaMap.tsx`) uses the Google Maps
  * JavaScript API. To add a new
  * community, just append an entry to `RAW_LOCATIONS` below — the map, search,
- * region filter, and service-area boundary all update automatically.
+ * and region filter all update automatically.
  */
 
 export type ServiceRegion =
@@ -34,8 +34,6 @@ export const MAP_CONFIG = {
     primary: "#008c58", // brand green (matches --color-brand)
     dark: "#00734a", // brand-press
     accent: "#6EE16E",
-    boundary: "#00734a", // service-area outline
-    boundaryFill: "rgba(0,140,88,0.10)",
   },
   maxZoom: 18,
   /** Fallback view if the boundary can't be computed. */

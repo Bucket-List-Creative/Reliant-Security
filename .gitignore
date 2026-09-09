@@ -53,3 +53,24 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Photography source files. Originals are archived outside the repo; the site
+# serves the web-sized crops in public/Images/site/ (also uploaded to Sanity as
+# assets), so nothing here is referenced at runtime.
+#
+# Raw camera formats must never be committed or deployed:
+#   • GitHub hard-rejects blobs over 100MB — two of the DNGs are 126MB each,
+#     so committing them would fail the push and leave unfixable objects in
+#     history.
+#   • Nothing references them; the web-sized WebP crops in
+#     public/Images/site/ are what the site actually serves.
+# Keep the originals backed up outside the repo so crops can be redone.
+*.DNG
+*.dng
+public/Images/Services/*.MP4
+
+# Full-resolution originals (10-17MB each). Regenerate crops from these with
+# sharp; keep them backed up outside git.
+/public/Images/About Us/
+/public/Images/Alarm Systems/
+/public/Images/Services/

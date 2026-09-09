@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
+import { breadcrumbJsonLd, jsonLdGraph } from "@/lib/schema";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -40,10 +42,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const found = await getProject(slug);
   if (!found) return {};
   const { cms, base } = found;
-  return {
+  return buildMetadata({
     title: cms?.title ?? base!.title,
     description: cms?.summary || base?.summary,
-  };
+    path: `/projects/${slug}`,
+    type: "article",
+  });
 }
 
 export default async function ProjectPage({ params }: Props) {
@@ -69,9 +73,8 @@ export default async function ProjectPage({ params }: Props) {
       ? `${SITE_URL}${localHero}`
       : undefined;
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Article",
+  const ARTICLE_NODE = {
+        "@type": "Article",
     headline: title,
     description: summary,
     ...(heroImageUrl && { image: heroImageUrl }),
@@ -80,6 +83,16 @@ export default async function ProjectPage({ params }: Props) {
     publisher: { "@type": "Organization", name: "Reliant Security" },
     ...(industry && { about: industry }),
   };
+
+  const jsonLd = jsonLdGraph(
+    ARTICLE_NODE,
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Projects", path: "/projects" },
+      { name: title, path: `/projects/${slug}` },
+    ]),
+  );
+
 
   // Taxonomy services are resolved from slugs; CMS ones come as references.
   const services = cms?.services?.length
@@ -101,12 +114,21 @@ export default async function ProjectPage({ params }: Props) {
       <article className="sfc-section pt-12">
         <Container>
           <div className="mx-auto max-w-4xl">
-            <Link
-              href="/projects"
-              className="text-sm text-n-500 transition-colors hover:text-ink"
-            >
-              ← All projects
-            </Link>
+            <nav aria-label="Breadcrumb" className="text-sm text-n-500">
+              <Link href="/" className="hover:text-ink">
+                Home
+              </Link>
+              <span className="mx-2" aria-hidden>
+                /
+              </span>
+              <Link href="/projects" className="hover:text-ink">
+                Projects
+              </Link>
+              <span className="mx-2" aria-hidden>
+                /
+              </span>
+              <span className="text-n-700">{title}</span>
+            </nav>
 
             <div className="mt-6 flex flex-wrap items-center gap-2">
               {industry && <Badge>{industry}</Badge>}

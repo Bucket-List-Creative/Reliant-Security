@@ -1,6 +1,7 @@
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { HOME_DEFAULTS } from "@/content/pages";
 
 type Props = {
   eyebrow?: string;
@@ -13,12 +14,13 @@ type Props = {
 export function Hero({
   // "24/7" attaches to professional monitoring, never to service or support —
   // Reliant does not offer round-the-clock emergency service or a 24/7 help
-  // desk, and the wording must not imply otherwise.
-  eyebrow = "24/7 Professional Monitoring",
-  title = "Security that feels effortless.",
-  subtitle = "Reliant Security designs, installs, and services security and low-voltage systems for homes, custom homes, multi-family, commercial, industrial, and government facilities — backed by 24/7 professional monitoring.",
-  primaryCta = { label: "Get a Same-Day Quote", href: "/contact" },
-  secondaryCta = { label: "Explore services", href: "/services" },
+  // desk, and the wording must not imply otherwise. The defaults live in
+  // `content/pages` so the Studio can be seeded with the same words.
+  eyebrow = HOME_DEFAULTS.hero.eyebrow,
+  title = HOME_DEFAULTS.hero.title,
+  subtitle = HOME_DEFAULTS.hero.subtitle,
+  primaryCta = HOME_DEFAULTS.hero.primaryCta,
+  secondaryCta = HOME_DEFAULTS.hero.secondaryCta,
 }: Props) {
   return (
     <section className="sfc-section pt-12">

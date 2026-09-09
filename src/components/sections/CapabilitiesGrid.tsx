@@ -5,7 +5,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
 import { Container } from "@/components/ui/Container";
 import { Card, CardIcon } from "@/components/ui/Card";
-import { ServiceIcon, type ServiceIconKey } from "@/components/ui/ServiceIcon";
+import { ServiceIcon, isServiceIconKey } from "@/components/ui/ServiceIcon";
+import {
+  HOME_CAPABILITIES,
+  HOME_DEFAULTS,
+  type PageCard,
+} from "@/content/pages";
 
 /**
  * "Who we are / what we do" — sits high on the home page so a visitor sees the
@@ -21,73 +26,30 @@ import { ServiceIcon, type ServiceIconKey } from "@/components/ui/ServiceIcon";
  * motion. See `.sfc-rail` in globals.css for why this is a native scroll
  * container rather than a scroll-jacked carousel.
  */
-type Capability = {
-  title: string;
-  description: string;
-  iconKey: ServiceIconKey;
-  href: string;
+type Props = {
+  heading?: string;
+  subheading?: string;
+  /** Cards from Sanity. Falls back to `CAPABILITIES` when absent or empty. */
+  items?: { _key?: string; title?: string; description?: string; iconKey?: string; href?: string }[];
 };
 
-const CAPABILITIES: Capability[] = [
-  {
-    title: "Residential Security",
-    description:
-      "Monitored alarms, cameras, and smart control for single-family homes, custom homes, and multi-family properties.",
-    iconKey: "home",
-    href: "/industries?segment=residential",
-  },
-  {
-    title: "Commercial Security",
-    description:
-      "Offices, retail, healthcare, and warehousing — systems designed around how the building is actually used.",
-    iconKey: "building",
-    href: "/industries?segment=commercial",
-  },
-  {
-    title: "Industrial & Government",
-    description:
-      "Large plants, manufacturing sites, and Federal, State, Municipal, and DoD facilities — including NDAA/TAA-compliant equipment.",
-    iconKey: "factory",
-    href: "/industries?segment=industrial",
-  },
-  {
-    title: "Video Surveillance",
-    description:
-      "Hardwired and wireless camera systems, from a single doorbell to site-wide industrial coverage.",
-    iconKey: "cctv",
-    href: "/services/cctv-surveillance",
-  },
-  {
-    title: "Access Control",
-    description:
-      "Keyless entry, mobile credentials, role-based permissions, and a full audit trail on every door.",
-    iconKey: "key",
-    href: "/services/access-control",
-  },
-  {
-    title: "Structured Cabling & Fiber",
-    description:
-      "Cat6/Cat6A, fiber, racks, and pathways — certified, labeled, and documented infrastructure.",
-    iconKey: "network",
-    href: "/services/network-cabling",
-  },
-  {
-    title: "Audio/Video",
-    description:
-      "Distributed audio, displays, and conference-room AV for homes and businesses alike.",
-    iconKey: "speaker",
-    href: "/services/audio-video",
-  },
-  {
-    title: "24/7 Professional Monitoring",
-    description:
-      "UL-certified central-station monitoring for intrusion, smoke, and carbon monoxide, every hour of the year.",
-    iconKey: "shield-check",
-    href: "/pricing",
-  },
-];
+const { heading: DEFAULT_HEADING, subheading: DEFAULT_SUBHEADING } =
+  HOME_DEFAULTS.capabilities;
 
-export function CapabilitiesGrid() {
+export function CapabilitiesGrid({ heading, subheading, items }: Props) {
+  // Only take CMS cards that are actually usable; a half-filled row in the
+  // Studio shouldn't blank out the rail.
+  const cards: PageCard[] = items?.length
+    ? items
+        .filter((i): i is typeof i & { title: string } => Boolean(i.title))
+        .map((i) => ({
+          title: i.title,
+          description: i.description ?? "",
+          iconKey: isServiceIconKey(i.iconKey) ? i.iconKey : "shield-check",
+          href: i.href || "/services",
+        }))
+    : HOME_CAPABILITIES;
+
   const railRef = useRef<HTMLUListElement>(null);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
@@ -133,14 +95,10 @@ export function CapabilitiesGrid() {
         <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
           <div className="max-w-3xl">
             <h2 className="text-3xl font-bold sm:text-4xl">
-              One local team, from a single home to a full industrial site
+              {heading || DEFAULT_HEADING}
             </h2>
             <p className="mt-4 text-lg text-n-700">
-              Reliant Security is a locally owned security and low-voltage
-              integrator. We design, install, and service everything here — so
-              whether you need an alarm on a house or surveillance, access
-              control, and fiber across a manufacturing plant, it&apos;s the
-              same team and the same standard.
+              {subheading || DEFAULT_SUBHEADING}
             </p>
           </div>
 
@@ -185,9 +143,11 @@ export function CapabilitiesGrid() {
             aria-label="What we do"
             className="sfc-rail -mx-6 px-6"
           >
-            {CAPABILITIES.map((c) => (
+            {cards.map((c) => (
               <li key={c.title} className="sfc-rail__item">
-                <Link href={c.href} className="block h-full">
+                {/* Cards always link somewhere; a CMS card with no
+                    destination falls back to the services index. */}
+                <Link href={c.href ?? "/services"} className="block h-full">
                   <Card
                     interactive
                     className="sfc-card--tint flex h-full flex-col items-center text-center"

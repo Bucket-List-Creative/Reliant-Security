@@ -1,16 +1,17 @@
 import Link from "next/link";
 import Image from "next/image";
-import { IconArrowRight, IconPhoto } from "@tabler/icons-react";
+import { IconArrowRight } from "@tabler/icons-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { SanityImage } from "@/components/ui/SanityImage";
 import type { ProjectListItem } from "@/sanity/lib/types";
+import { PHOTOS } from "@/content/photos";
 
 /**
  * `localImage` is a path under /public, used by the built-in project taxonomy
  * before photography is loaded into Sanity. Callers are responsible for only
- * passing a path that exists (see `lib/publicAssets`), so a missing file shows
- * the placeholder well rather than a broken image.
+ * passing a path that exists (see `lib/publicAssets`), so a missing file falls
+ * through to brand photography rather than rendering broken.
  */
 export function ProjectCard({
   item,
@@ -33,28 +34,17 @@ export function ProjectCard({
               className="h-48 w-full object-cover"
               sizes="(min-width: 1024px) 380px, 100vw"
             />
-          ) : localImage ? (
+          ) : (
+            /* Site photography stands in until a project's own shots land, so
+               a row of cards never breaks on an empty well. */
             <Image
-              src={localImage}
-              alt=""
+              src={localImage ?? PHOTOS.installCommercial.src}
+              alt={localImage ? "" : PHOTOS.installCommercial.alt}
               width={640}
               height={400}
               className="h-48 w-full object-cover"
               sizes="(min-width: 1024px) 380px, 100vw"
             />
-          ) : (
-            <div
-              className="flex h-48 w-full items-center justify-center bg-surface text-n-500"
-              aria-hidden="true"
-              style={{ boxShadow: "var(--shadow-soft-in-sm)" }}
-            >
-              <span className="flex flex-col items-center gap-2 text-center">
-                <IconPhoto size={26} stroke={1.6} />
-                <span className="text-xs font-medium tracking-wide">
-                  Project photos coming soon
-                </span>
-              </span>
-            </div>
           )}
         </div>
 

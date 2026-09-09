@@ -1,11 +1,7 @@
-"use client";
-
-import { useState } from "react";
 import { IconCheck } from "@tabler/icons-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { Toggle } from "@/components/ui/Toggle";
 import type { Plan } from "@/sanity/lib/types";
 
 const FALLBACK: Plan[] = [
@@ -66,9 +62,6 @@ const FALLBACK: Plan[] = [
   },
 ];
 
-// Annual billing applies a 2-month discount (pay for 10).
-const ANNUAL_FACTOR = 10 / 12;
-
 /**
  * Format a monthly figure as currency. Plans are priced with cents
  * ($49.99), so rounding to whole dollars would misstate the price —
@@ -79,37 +72,28 @@ function formatPrice(amount: number) {
   return `$${amount.toFixed(hasCents ? 2 : 0)}`;
 }
 
-function priceLabel(plan: Plan, annual: boolean) {
+/**
+ * Reliant bills monitoring monthly only — there is no annual plan and no
+ * annual discount, so the page shows a single monthly figure. Don't
+ * reintroduce a monthly/annual switch without a real annual price to put
+ * behind it.
+ */
+function priceLabel(plan: Plan) {
   if (typeof plan.price !== "number") return { amount: "Custom", per: "" };
-  const monthly = annual ? plan.price * ANNUAL_FACTOR : plan.price;
   return {
-    amount: formatPrice(monthly),
+    amount: formatPrice(plan.price),
     per: plan.period ?? "/mo",
   };
 }
 
 export function PricingTable({ plans }: { plans?: Plan[] }) {
-  const [annual, setAnnual] = useState(false);
   const items = plans?.length ? plans : FALLBACK;
 
   return (
     <div>
-      <div className="mb-10 flex items-center justify-center gap-4">
-        <span className={annual ? "text-n-500" : "font-semibold"}>Monthly</span>
-        <Toggle
-          checked={annual}
-          onChange={setAnnual}
-          label="Toggle annual billing"
-        />
-        <span className={annual ? "font-semibold" : "text-n-500"}>
-          Annual{" "}
-          <span className="text-sm text-brand-press">(save ~17%)</span>
-        </span>
-      </div>
-
       <div className="grid gap-6 lg:grid-cols-3">
         {items.map((plan) => {
-          const { amount, per } = priceLabel(plan, annual);
+          const { amount, per } = priceLabel(plan);
           const featured = plan.featured === "featured";
           return (
             <Card

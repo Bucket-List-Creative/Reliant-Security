@@ -39,6 +39,10 @@ export function SanityImage({
       priority={priority}
       placeholder={lqip ? "blur" : "empty"}
       blurDataURL={lqip}
+      // `urlFor()` already requests an exact width with `auto("format")`, so
+      // Sanity's CDN has done the resizing and format negotiation. Passing it
+      // through Next's optimizer again would cost compute for no gain.
+      unoptimized
     />
   );
 }

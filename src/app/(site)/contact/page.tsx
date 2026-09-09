@@ -1,6 +1,7 @@
 import { FaqAccordion } from "@/components/sections/FaqAccordion";
 import { CONTACT_FAQS } from "@/content/faqs";
 import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 import type { ReactNode } from "react";
 import {
   IconPhone,
@@ -12,19 +13,19 @@ import {
 import { sanityFetch } from "@/sanity/lib/live";
 import { SITE_SETTINGS_QUERY } from "@/sanity/lib/queries";
 import type { SiteSettings, SocialLink } from "@/sanity/lib/types";
-import { SITE_URL, SITE_NAME } from "@/config/site";
+import { organizationJsonLd, jsonLdGraph } from "@/lib/schema";
 import { Container } from "@/components/ui/Container";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { ServiceAreaMap } from "@/components/ui/ServiceAreaMap";
 import { ContactForm } from "@/components/sections/ContactForm";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildMetadata({
   title: "Contact",
   description:
     "Contact Reliant Security in O'Fallon, MO for a free, same-day security assessment. Call (636) 294-5645 or send us a message.",
-  alternates: { canonical: "/contact" },
-};
+  path: "/contact",
+});
 
 /**
  * Sensible defaults sourced from the live Reliant site so the page is complete
@@ -101,38 +102,11 @@ export default async function ContactPage() {
   const reviewsUrl = settings?.googleReviewsUrl;
 
   // ---- Structured data for local SEO ----
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "SecuritySystemInstaller",
-    name: SITE_NAME,
-    url: `${SITE_URL}/contact`,
-    telephone: phone,
-    email,
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: "O'Fallon",
-      addressRegion: "MO",
-      addressCountry: "US",
-    },
-    areaServed: AREAS_SERVED.map((name) => ({ "@type": "City", name })),
-    openingHoursSpecification: [
-      {
-        "@type": "OpeningHoursSpecification",
-        dayOfWeek: [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-          "Sunday",
-        ],
-        opens: "09:00",
-        closes: "21:00",
-      },
-    ],
-    sameAs: social.map((s) => s.url).filter(Boolean),
-  };
+  // Same `@id` as the home page: one business, described twice.
+  const jsonLd = jsonLdGraph(
+    organizationJsonLd({ settings, areaServed: AREAS_SERVED }),
+  );
+
 
   return (
     <>

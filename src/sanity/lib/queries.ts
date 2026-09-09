@@ -25,7 +25,6 @@ export const SITE_SETTINGS_QUERY = defineQuery(/* groq */ `
     email,
     address,
     hours,
-    aboutVideoUrl,
     googleReviewsUrl,
     bbbUrl,
     angiesListUrl,
@@ -147,6 +146,7 @@ export const POST_QUERY = defineQuery(/* groq */ `
   *[_type == "post" && slug.current == $slug][0]{
     _id,
     title,
+    seoTitle,
     "slug": slug.current,
     excerpt,
     publishedAt,
@@ -243,5 +243,130 @@ export const INDUSTRY_QUERY = defineQuery(/* groq */ `
     threats[]{ _key, title, description },
     solutions[]{ _key, title, description },
     services[]->{ _id, title, "slug": slug.current, icon, summary }
+  }
+`);
+
+/* ---- Resources ---- */
+export const RESOURCES_QUERY = defineQuery(/* groq */ `
+  *[_type == "resource"] | order(order asc, title asc){
+    _id,
+    title,
+    "slug": slug.current,
+    kind,
+    summary,
+    url,
+    "fileUrl": file.asset->url,
+    image{ ${imageFragment} }
+  }
+`);
+
+/* ---- Service area (location) pages ---- */
+export const LOCATIONS_QUERY = defineQuery(/* groq */ `
+  *[_type == "location"]{
+    _id,
+    city,
+    "slug": slug.current
+  }
+`);
+
+export const LOCATION_QUERY = defineQuery(/* groq */ `
+  *[_type == "location" && slug.current == $slug][0]{
+    _id,
+    city,
+    "slug": slug.current,
+    heading,
+    intro,
+    body,
+    metaTitle,
+    metaDescription,
+    heroImage{ ${imageFragment} }
+  }
+`);
+
+/* ---- Policy pages ---- */
+export const LEGAL_PAGE_SLUGS_QUERY = defineQuery(/* groq */ `
+  *[_type == "legalPage" && defined(slug.current)]{ "slug": slug.current }
+`);
+
+export const LEGAL_PAGE_QUERY = defineQuery(/* groq */ `
+  *[_type == "legalPage" && slug.current == $slug][0]{
+    _id,
+    title,
+    "slug": slug.current,
+    intro,
+    body,
+    updatedAt
+  }
+`);
+
+/* ---- Page copy singletons ------------------------------------------- */
+/*  Every field is optional: the pages fall back to the wording built into  */
+/*  the components, so an absent document changes nothing.                 */
+
+export const HOME_PAGE_QUERY = defineQuery(/* groq */ `
+  *[_type == "homePage"][0]{
+    eyebrow,
+    title,
+    subtitle,
+    primaryCta{ label, href },
+    secondaryCta{ label, href },
+    capabilities{
+      heading,
+      subheading,
+      items[]{ _key, title, description, iconKey, href }
+    },
+    serviceDirectory{ heading, subheading },
+    industries{ heading, subheading },
+    projects{ heading, subheading },
+    testimonials{ heading, subheading },
+    serviceArea{ heading, subheading }
+  }
+`);
+
+export const ABOUT_PAGE_QUERY = defineQuery(/* groq */ `
+  *[_type == "aboutPage"][0]{
+    badge,
+    heading,
+    intro,
+    introImage{ ${imageFragment} },
+    differentiators{
+      heading,
+      subheading,
+      items[]{ _key, title, description, iconKey }
+    },
+    customers{
+      heading,
+      subheading,
+      items[]{ _key, title, description, iconKey }
+    },
+    ownerNote{
+      heading,
+      body,
+      authorName,
+      authorRole,
+      photo{ ${imageFragment} }
+    }
+  }
+`);
+
+export const SERVICES_PAGE_QUERY = defineQuery(/* groq */ `
+  *[_type == "servicesPage"][0]{
+    badge,
+    heading,
+    intro,
+    heroImage{ ${imageFragment} }
+  }
+`);
+
+export const NAVIGATION_QUERY = defineQuery(/* groq */ `
+  *[_type == "navigation"][0]{
+    ctaLabel,
+    primary[]{
+      _key,
+      label,
+      href,
+      children[]{ _key, label, href, desc, iconKey }
+    },
+    footerLinks[]{ _key, label, href }
   }
 `);
