@@ -22,6 +22,7 @@ export const aboutPage = defineType({
     { name: "intro", title: "Intro", default: true },
     { name: "cards", title: "Card grids" },
     { name: "note", title: "Note from Reliant" },
+  { name: "video", title: "Video" },
   ],
   fields: [
     /* ---- Intro ---- */
@@ -131,6 +132,16 @@ export const aboutPage = defineType({
           ],
         }),
       ],
+    }),
+
+    defineField({
+      name: "videoUrl",
+      title: "Video link (YouTube or Vimeo)",
+      group: "video",
+      type: "url",
+      validation: (rule) => rule.uri({ scheme: ["http", "https"] }),
+      description:
+        "Optional. Replaces the short clip in the \u201cWhat it looks like day to day\u201d section. Paste a YouTube or Vimeo link; leave empty to keep the bundled clip. Clearing the field reverts to the bundled clip rather than hiding the section.",
     }),
   ],
   preview: { prepare: () => ({ title: "About page" }) },

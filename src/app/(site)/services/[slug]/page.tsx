@@ -313,6 +313,7 @@ export default async function ServiceDetailPage({ params }: Props) {
               image={svc.heroImage}
               src={photo?.src}
               alt={photo?.alt}
+              objectPosition={photo?.position}
               aspectClassName="aspect-[16/10] lg:aspect-[4/3]"
               label={`${svc.title} image`}
               className="w-full"

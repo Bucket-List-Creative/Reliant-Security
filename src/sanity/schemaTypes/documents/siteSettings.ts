@@ -96,6 +96,35 @@ export const siteSettings = defineType({
         }),
       ],
     }),
+
+    /* ---- Brand media ----
+       These override the files committed under `public/Images/`. Left empty,
+       the repo copies are used, so the site is never broken by an empty
+       field — but nothing here can be changed without a developer until
+       something is uploaded. */
+    defineField({
+      name: "logo",
+      title: "Logo (light, for the dark navbar and footer)",
+      type: "image",
+      options: { hotspot: true },
+      description:
+        "Optional. Replaces the built-in Reliant logo in the navbar and footer. Use a transparent PNG or SVG that reads on a dark green background.",
+    }),
+    defineField({
+      name: "ctaImage",
+      title: "Quote-banner image",
+      type: "image",
+      options: { hotspot: true },
+      description:
+        "Optional. The vehicle parked on the \u201cGet a same-day quote\u201d banner, which appears at the foot of most pages. Use a photo with a transparent background so it sits on the banner cleanly.",
+      fields: [
+        defineField({
+          name: "alt",
+          title: "Alternative text",
+          type: "string",
+        }),
+      ],
+    }),
   ],
   preview: {
     prepare() {

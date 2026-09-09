@@ -162,6 +162,58 @@ export const PROJECTS: TaxonomyProject[] = [
     solution: GALVANIZING_SOLUTION,
     equipment: GALVANIZING_EQUIPMENT,
   },
+  {
+    /**
+     * ⚠️ UNVERIFIED — every field below needs Reliant's confirmation before
+     * launch. This entry was added on request, without a project brief, so it
+     * carries the same DRAFT status as rule 2 above but with more riding on
+     * it: unlike the galvanizing sites, nothing here was supplied. Three
+     * things in particular are inferences, not facts:
+     *
+     *   - `location` assumes the Lincoln County Fairgrounds in Troy, MO,
+     *     which is the Lincoln County in Reliant's service area
+     *     (`src/config/serviceAreas.ts`). Confirm before publishing.
+     *   - `segments` assumes a county-owned ground run by a fair board, so it
+     *     lists both commercial and government. That decides which filters on
+     *     /projects the entry appears under.
+     *   - `challenge` / `solution` / `equipment` describe what fairground work
+     *     of this kind generally involves. They are not a record of what
+     *     Reliant actually installed.
+     *
+     * Not `featured` on purpose: featured projects surface on the home page
+     * and the About page, and this one has no photography yet, so promoting it
+     * would put an empty placeholder in both.
+     */
+    slug: "lincoln-county-fair",
+    title: "Video surveillance across a county fairground",
+    client: "Lincoln County Fair",
+    industry: "Events & Public Venues",
+    location: "Troy, Missouri",
+    segments: ["commercial", "government"],
+    summary:
+      "Camera coverage across the grounds, barns, and parking areas of a county fairground that fills and empties with the season.",
+    image: "/Images/Projects/lincoln-county-fair/hero.jpg",
+    gallery: [
+      "/Images/Projects/lincoln-county-fair/01.jpg",
+      "/Images/Projects/lincoln-county-fair/02.jpg",
+      "/Images/Projects/lincoln-county-fair/03.jpg",
+    ],
+    challenge: [
+      "A fairground is two different sites across one year. For most of it, it is a large, open, largely unattended property — buildings, barns, and equipment spread across acres with no one on hand overnight. For fair week it turns into one of the busiest venues in the county, with thousands of people, cash handling, livestock, and vehicles moving through the same ground.",
+      "Both states are hard to cover. The quiet months invite trespass and theft from outbuildings that sit well away from any occupied structure, and the busy week needs coverage that helps staff manage crowds, gates, and parking rather than just recording what went wrong.",
+    ],
+    solution: [
+      "Reliant designed camera coverage that works in both states: fixed views on the buildings, barns, and equipment that need watching year-round, and coverage of the gates, midway, and parking areas that matter during the fair itself.",
+      "Recording was sized so footage is still there when an incident surfaces after the event, and the system was built to be viewed remotely — a fairground has no security office staffed through the winter, so the people responsible for it need to be able to look from wherever they are.",
+    ],
+    equipment: [
+      "Exterior IP video surveillance",
+      "Weatherproof cameras & mounts",
+      "Network video recording with extended retention",
+      "Structured cabling & network backbone",
+      "Remote live view and playback",
+    ],
+  },
 ];
 
 export const ALL_PROJECT_SLUGS: string[] = PROJECTS.map((p) => p.slug);

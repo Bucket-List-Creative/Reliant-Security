@@ -46,6 +46,26 @@ const LOCAL_IMAGE_BY_SLUG = new Map(
   PROJECTS.map((p) => [p.slug, publicAssetOrUndefined(p.image)]),
 );
 
+/**
+ * CMS documents override the taxonomy by slug, and taxonomy entries with no
+ * document yet are kept rather than dropped — the same contract the services
+ * index and the project detail page already follow, and the one
+ * `src/content/projects.ts` documents at the top of the file.
+ *
+ * This used to be `cms?.length ? cms : TAXONOMY_ITEMS`, which meant a single
+ * `project` document in Sanity hid every taxonomy default. Anything added to
+ * the taxonomy simply never appeared on this page, while its detail route at
+ * /projects/[slug] rendered fine — so the entry existed but was unreachable.
+ *
+ * CMS order comes first because that ordering is editor-controlled (featured,
+ * then `order`, then date). Taxonomy-only entries follow in taxonomy order.
+ */
+function mergeProjects(cms: ProjectListItem[] | null): ProjectListItem[] {
+  if (!cms?.length) return TAXONOMY_ITEMS;
+  const fromCms = new Set(cms.map((p) => p.slug));
+  return [...cms, ...TAXONOMY_ITEMS.filter((p) => !fromCms.has(p.slug))];
+}
+
 type Props = { searchParams: Promise<{ segment?: string }> };
 
 export default async function ProjectsPage({ searchParams }: Props) {
@@ -55,8 +75,7 @@ export default async function ProjectsPage({ searchParams }: Props) {
     sanityFetch({ query: SITE_SETTINGS_QUERY }),
   ]);
 
-  const cms = projects as ProjectListItem[] | null;
-  const all = cms?.length ? cms : TAXONOMY_ITEMS;
+  const all = mergeProjects(projects as ProjectListItem[] | null);
   const items = VALID_SEGMENTS.has(segment)
     ? all.filter((p) => p.segments?.includes(segment as IndustrySegment))
     : all;
