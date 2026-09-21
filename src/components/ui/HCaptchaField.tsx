@@ -15,6 +15,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 type HCaptchaApi = {
   render: (el: HTMLElement, opts: Record<string, unknown>) => string;
   reset: (id?: string) => void;
+  remove: (id: string) => void;
 };
 
 declare global {
@@ -58,11 +59,14 @@ function loadHCaptcha(): Promise<void> {
 export function HCaptchaField({
   sitekey,
   onChange,
+  onUnavailable,
   resetSignal = 0,
 }: {
   sitekey: string;
   /** Called with a token when solved, and with null when cleared or expired. */
   onChange: (token: string | null) => void;
+  /** Fired when hCaptcha can't load at all, so the form can offer a way out. */
+  onUnavailable?: () => void;
   /** Increment to clear a spent token — hCaptcha tokens are single-use. */
   resetSignal?: number;
 }) {
@@ -74,9 +78,11 @@ export function HCaptchaField({
   // an inline arrow from the parent would otherwise tear down and re-render
   // the widget on every parent render, wiping a solved challenge.
   const onChangeRef = useRef(onChange);
+  const onUnavailableRef = useRef(onUnavailable);
   useEffect(() => {
     onChangeRef.current = onChange;
-  }, [onChange]);
+    onUnavailableRef.current = onUnavailable;
+  }, [onChange, onUnavailable]);
 
   const emit = useCallback((token: string | null) => {
     onChangeRef.current(token);
@@ -92,6 +98,11 @@ export function HCaptchaField({
 
         widgetId.current = window.hcaptcha.render(containerRef.current, {
           sitekey,
+          // The default widget is 303px wide and overflows the card on the
+          // narrowest phones.
+          size: window.matchMedia("(max-width: 359px)").matches
+            ? "compact"
+            : "normal",
           callback: (token: string) => emit(token),
           "expired-callback": () => emit(null),
           "chalexpired-callback": () => emit(null),
@@ -99,11 +110,25 @@ export function HCaptchaField({
         });
       })
       .catch(() => {
-        if (!cancelled) setUnavailable(true);
+        if (cancelled) return;
+        setUnavailable(true);
+        onUnavailableRef.current?.();
       });
 
     return () => {
       cancelled = true;
+      // Tear the widget down on unmount. The success state replaces the whole
+      // form, so without this a "send another" flow would leave an orphaned
+      // iframe and `render()` would refuse to mount a second one.
+      const id = widgetId.current;
+      widgetId.current = null;
+      if (id !== null) {
+        try {
+          window.hcaptcha?.remove(id);
+        } catch {
+          // Already gone — nothing to clean up.
+        }
+      }
     };
   }, [sitekey, emit]);
 
@@ -122,8 +147,19 @@ export function HCaptchaField({
       <div ref={containerRef} className="mt-2" />
       {unavailable && (
         <p role="alert" className="mt-2 text-sm text-n-700">
-          The verification widget could not load. Check your connection or any
-          content blocker, then reload the page.
+          The verification widget could not load — a privacy extension or
+          network filter may be blocking it. Please call{" "}
+          <a href="tel:6362945645" className="font-semibold underline">
+            (636) 294-5645
+          </a>{" "}
+          or email{" "}
+          <a
+            href="mailto:customercare@secure-reliant.com"
+            className="font-semibold underline"
+          >
+            customercare@secure-reliant.com
+          </a>{" "}
+          instead.
         </p>
       )}
     </div>

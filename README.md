@@ -49,8 +49,6 @@ deploys.
 | `GOOGLE_PLACE_ID` | no | Which business's reviews to show. |
 | `SANITY_API_READ_TOKEN` | no | Viewer token. Enables draft preview; without it the site serves published content only. |
 | `SANITY_REVALIDATE_SECRET` | no | Shared secret for the Sanity revalidation webhook. |
-| `NEXT_PUBLIC_HCAPTCHA_SITE_KEY` | no | hCaptcha site key. Set with the secret to put a captcha on the contact form. |
-| `HCAPTCHA_SECRET_KEY` | no | hCaptcha secret. Server-only. |
 | `NEXT_PUBLIC_SITE_URL` | prod | Canonical origin. Without it, Vercel builds fall back to the deployment hostname and canonical/OG URLs point at the preview URL. |
 
 ### Live Google reviews
@@ -136,33 +134,52 @@ invalidation would silently do nothing. Pages regenerate lazily on next visit.
 
 ## Contact form captcha
 
-The contact form posts to `/api/contact`, which validates the fields and then
-posts server-to-server to Jotform.
+The contact form is ours; Jotform is only the destination. `/api/contact`
+validates the fields and posts server-to-server to
+`submit.jotform.com`.
 
-**A captcha configured inside Jotform does not work with this setup, and breaks
-it.** Nobody loads Jotform's hosted page, so its captcha has nothing to
-protect; meanwhile Jotform starts rejecting the server-side submission for a
-missing captcha response and every visitor sees the error state. If submissions
-suddenly stop arriving, check whether a captcha field was added to the Jotform
-form — that is the first thing to rule out.
+The Jotform form has a **required captcha field**, so a submission with no
+token is refused. The token is solved in the visitor's browser using
+**Jotform's own site key** and forwarded verbatim in the submission body as two
+fields — `h-captcha-response` (the token) and `hcaptcha_visible` (the flag
+Jotform's own solve-callback sets). The flag is derived from the token, never
+hardcoded.
 
-The captcha belongs on `/api/contact`, which is the endpoint a bot would
-actually hit. To enable it:
+**No environment variables are involved.** The site key is published in
+Jotform's page source and is hardcoded in `src/lib/jotform.ts`; re-copy it from
+the `data-sitekey` attribute at `https://form.jotform.com/<FORM_ID>` if Jotform
+rotates it.
 
-1. Create a free site at hcaptcha.com and copy the **site key** and **secret**.
-2. Set `NEXT_PUBLIC_HCAPTCHA_SITE_KEY` and `HCAPTCHA_SECRET_KEY` (locally and
-   on the host).
-3. Make sure the Jotform form has **no** captcha field.
+**The token is deliberately not verified here.** hCaptcha tokens are
+single-use — calling `siteverify` would spend the token, and Jotform's own
+check would then fail on a token that had already been consumed. Jotform holds
+the matching secret; verification is theirs. This route only refuses an
+obviously tokenless submission, so the browser gets a truthful answer instead
+of Jotform's 200-that-means-rejected.
 
-Behaviour is deliberately all-or-nothing:
+### Things that cost real time to rediscover
 
-- Neither set → no widget, no verification. The form works exactly as it did
-  before, so a missing env var can't lock visitors out of the only lead form.
-- Site key set, secret missing → submissions are refused with a 500 and a
-  server log. The widget is visible to visitors, so waving submissions through
-  unverified would mean the form only looks protected.
-- Both set → the widget renders and the token is verified against hCaptcha
-  before anything reaches Jotform. Verification failures fail closed.
+- **Jotform answers a rejection with HTTP 200 and an HTML page.** A bare 200
+  means nothing. Acceptance is a *redirect*, which is why the fetch uses
+  `redirect: "manual"` — following it collapses the one unambiguous signal into
+  another 200 that has to be sniffed.
+- **hCaptcha's auto-scan never finds a React-mounted widget.** The script scans
+  once on load, before hydration. `HCaptchaField` loads it with
+  `?render=explicit` and calls `render()` itself, which also yields the widget
+  id needed to reset a spent token.
+- **Tokens are single-use and expire in minutes.** The form resets the widget
+  after every attempt; without that, a retry fails on a stale token and looks
+  like the form is broken.
+- **A blocked hCaptcha is an unreachable form.** Privacy extensions and some
+  corporate networks block it outright, and the captcha is mandatory, so there
+  is no submitting past it. The field surfaces the phone number and email
+  address and the submit button disables itself.
+- **Dropdown values are a contract.** `q6_serviceOf` must match Jotform's
+  option strings exactly or the value is stored but drops out of Jotform's own
+  reports and filters.
 
-For local testing, `.env.local` carries hCaptcha's official always-pass test
-keys, commented out.
+### Privacy
+
+hCaptcha is a third-party processor: it receives the visitor's IP address and
+sets its own cookies. The privacy policy needs a line saying so — it is a new
+data flow, not just a widget.

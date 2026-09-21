@@ -7,20 +7,15 @@ import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { HCaptchaField } from "@/components/ui/HCaptchaField";
 import { SERVICE_CATEGORIES } from "@/content/services";
+import { JOTFORM_HCAPTCHA_SITEKEY } from "@/lib/jotform";
 
 type Status = "idle" | "sending" | "success" | "error" | "captcha";
-
-/**
- * Inlined at build time. Empty means captcha is switched off entirely and the
- * form behaves exactly as it did before — the safe default, so a missing env
- * var can never lock visitors out of the only lead form on the site.
- */
-const HCAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ?? "";
 
 export function ContactForm() {
   const [status, setStatus] = useState<Status>("idle");
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaReset, setCaptchaReset] = useState(0);
+  const [captchaBroken, setCaptchaBroken] = useState(false);
   const submitting = useRef(false);
 
   const handleCaptcha = useCallback((token: string | null) => {
@@ -29,11 +24,16 @@ export function ContactForm() {
     setStatus((current) => (current === "captcha" && token ? "idle" : current));
   }, []);
 
+  // Jotform requires the captcha, so a blocked widget means this form cannot
+  // be submitted at all. The field itself shows the phone and email fallback;
+  // this just stops the submit button pretending there is a way through.
+  const handleCaptchaUnavailable = useCallback(() => setCaptchaBroken(true), []);
+
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (submitting.current) return;
 
-    if (HCAPTCHA_SITE_KEY && !captchaToken) {
+    if (!captchaToken) {
       setStatus("captcha");
       return;
     }
@@ -42,7 +42,13 @@ export function ContactForm() {
     setStatus("sending");
 
     const body = new FormData(e.currentTarget);
-    if (captchaToken) body.set("hcaptchaToken", captchaToken);
+    body.set("hcaptchaToken", captchaToken);
+    // hCaptcha injects its own textarea into whichever form it sits in, so
+    // FormData picks the token up a second time under hCaptcha's name. The
+    // route reads `hcaptchaToken`; drop the duplicates rather than sending the
+    // same value twice under three names.
+    body.delete("h-captcha-response");
+    body.delete("g-recaptcha-response");
 
     try {
       const response = await fetch("/api/contact", {
@@ -168,16 +174,15 @@ export function ContactForm() {
           placeholder="Tell us about your home or business and what you'd like to protect."
         />
 
-        {HCAPTCHA_SITE_KEY && (
-          <HCaptchaField
-            sitekey={HCAPTCHA_SITE_KEY}
-            onChange={handleCaptcha}
-            resetSignal={captchaReset}
-          />
-        )}
+        <HCaptchaField
+          sitekey={JOTFORM_HCAPTCHA_SITEKEY}
+          onChange={handleCaptcha}
+          onUnavailable={handleCaptchaUnavailable}
+          resetSignal={captchaReset}
+        />
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <Button type="submit" variant="primary" className="w-full sm:w-auto" disabled={status === "sending"}>
+          <Button type="submit" variant="primary" className="w-full sm:w-auto" disabled={status === "sending" || captchaBroken}>
             {status === "sending" ? "Sending your request…" : "Get my same-day quote"}
           </Button>
           <p className="text-xs text-n-500">
@@ -185,7 +190,7 @@ export function ContactForm() {
             request.
           </p>
         </div>
-        {status === "captcha" && (
+        {status === "captcha" && !captchaBroken && (
           <p role="alert" className="text-sm text-n-700">
             Please complete the verification above so we know you&apos;re not a
             bot, then submit again.
