@@ -49,6 +49,8 @@ deploys.
 | `GOOGLE_PLACE_ID` | no | Which business's reviews to show. |
 | `SANITY_API_READ_TOKEN` | no | Viewer token. Enables draft preview; without it the site serves published content only. |
 | `SANITY_REVALIDATE_SECRET` | no | Shared secret for the Sanity revalidation webhook. |
+| `NEXT_PUBLIC_HCAPTCHA_SITE_KEY` | no | hCaptcha site key. Set with the secret to put a captcha on the contact form. |
+| `HCAPTCHA_SECRET_KEY` | no | hCaptcha secret. Server-only. |
 | `NEXT_PUBLIC_SITE_URL` | prod | Canonical origin. Without it, Vercel builds fall back to the deployment hostname and canonical/OG URLs point at the preview URL. |
 
 ### Live Google reviews
@@ -131,3 +133,36 @@ The route calls `revalidatePath("/", "layout")` rather than `revalidateTag`.
 Sanity reads go through `defineLive`'s `sanityFetch`, which owns its cache tags
 internally — there is no stable per-type tag to target, so tag-based
 invalidation would silently do nothing. Pages regenerate lazily on next visit.
+
+## Contact form captcha
+
+The contact form posts to `/api/contact`, which validates the fields and then
+posts server-to-server to Jotform.
+
+**A captcha configured inside Jotform does not work with this setup, and breaks
+it.** Nobody loads Jotform's hosted page, so its captcha has nothing to
+protect; meanwhile Jotform starts rejecting the server-side submission for a
+missing captcha response and every visitor sees the error state. If submissions
+suddenly stop arriving, check whether a captcha field was added to the Jotform
+form — that is the first thing to rule out.
+
+The captcha belongs on `/api/contact`, which is the endpoint a bot would
+actually hit. To enable it:
+
+1. Create a free site at hcaptcha.com and copy the **site key** and **secret**.
+2. Set `NEXT_PUBLIC_HCAPTCHA_SITE_KEY` and `HCAPTCHA_SECRET_KEY` (locally and
+   on the host).
+3. Make sure the Jotform form has **no** captcha field.
+
+Behaviour is deliberately all-or-nothing:
+
+- Neither set → no widget, no verification. The form works exactly as it did
+  before, so a missing env var can't lock visitors out of the only lead form.
+- Site key set, secret missing → submissions are refused with a 500 and a
+  server log. The widget is visible to visitors, so waving submissions through
+  unverified would mean the form only looks protected.
+- Both set → the widget renders and the token is verified against hCaptcha
+  before anything reaches Jotform. Verification failures fail closed.
+
+For local testing, `.env.local` carries hCaptcha's official always-pass test
+keys, commented out.

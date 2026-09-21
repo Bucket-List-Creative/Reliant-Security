@@ -1,33 +1,68 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useCallback, useRef, useState, type FormEvent } from "react";
 import { IconCheck } from "@tabler/icons-react";
 import { Card } from "@/components/ui/Card";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { HCaptchaField } from "@/components/ui/HCaptchaField";
 import { SERVICE_CATEGORIES } from "@/content/services";
 
-type Status = "idle" | "sending" | "success" | "error";
+type Status = "idle" | "sending" | "success" | "error" | "captcha";
+
+/**
+ * Inlined at build time. Empty means captcha is switched off entirely and the
+ * form behaves exactly as it did before — the safe default, so a missing env
+ * var can never lock visitors out of the only lead form on the site.
+ */
+const HCAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ?? "";
 
 export function ContactForm() {
   const [status, setStatus] = useState<Status>("idle");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaReset, setCaptchaReset] = useState(0);
   const submitting = useRef(false);
+
+  const handleCaptcha = useCallback((token: string | null) => {
+    setCaptchaToken(token);
+    // Clear a "please verify" warning the moment they actually do.
+    setStatus((current) => (current === "captcha" && token ? "idle" : current));
+  }, []);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (submitting.current) return;
+
+    if (HCAPTCHA_SITE_KEY && !captchaToken) {
+      setStatus("captcha");
+      return;
+    }
+
     submitting.current = true;
     setStatus("sending");
+
+    const body = new FormData(e.currentTarget);
+    if (captchaToken) body.set("hcaptchaToken", captchaToken);
 
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
-        body: new FormData(e.currentTarget),
+        body,
       });
       const result = await response.json();
-      setStatus(response.ok && result.success === true ? "success" : "error");
+      const ok = response.ok && result.success === true;
+      setStatus(ok ? "success" : "error");
+      if (!ok) {
+        // hCaptcha tokens are single-use, and the server has now spent this
+        // one. Without a reset the visitor's retry fails verification rather
+        // than reaching Jotform, which looks like the form is simply broken.
+        setCaptchaToken(null);
+        setCaptchaReset((n) => n + 1);
+      }
     } catch {
       setStatus("error");
+      setCaptchaToken(null);
+      setCaptchaReset((n) => n + 1);
     } finally {
       submitting.current = false;
     }
@@ -133,6 +168,14 @@ export function ContactForm() {
           placeholder="Tell us about your home or business and what you'd like to protect."
         />
 
+        {HCAPTCHA_SITE_KEY && (
+          <HCaptchaField
+            sitekey={HCAPTCHA_SITE_KEY}
+            onChange={handleCaptcha}
+            resetSignal={captchaReset}
+          />
+        )}
+
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <Button type="submit" variant="primary" className="w-full sm:w-auto" disabled={status === "sending"}>
             {status === "sending" ? "Sending your request…" : "Get my same-day quote"}
@@ -142,6 +185,12 @@ export function ContactForm() {
             request.
           </p>
         </div>
+        {status === "captcha" && (
+          <p role="alert" className="text-sm text-n-700">
+            Please complete the verification above so we know you&apos;re not a
+            bot, then submit again.
+          </p>
+        )}
         {status === "error" && (
           <p role="alert" className="text-sm text-n-700">
             We couldn&apos;t confirm your request was received. Your details are

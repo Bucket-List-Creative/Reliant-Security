@@ -1,6 +1,48 @@
 import { SERVICE_CATEGORIES } from "@/content/services";
 
 const FORM_ID = "262504892326056";
+
+const HCAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ?? "";
+const HCAPTCHA_SECRET = process.env.HCAPTCHA_SECRET_KEY ?? "";
+
+/**
+ * Verify the hCaptcha token with hCaptcha directly.
+ *
+ * This route is the actual attack surface: the browser form posts here, and
+ * this handler then posts server-to-server to Jotform. A captcha configured on
+ * the Jotform form protects Jotform's own hosted page, which nobody on this
+ * site ever loads — a bot would hit `/api/contact`, which only this check
+ * defends. That is why verification lives here rather than being forwarded.
+ *
+ * `remoteip` is deliberately not sent. Behind a CDN the address we observe is
+ * often an edge node rather than the visitor, and a mismatch makes hCaptcha
+ * reject tokens that are perfectly valid.
+ */
+async function captchaAccepted(token: string): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const res = await fetch("https://api.hcaptcha.com/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ secret: HCAPTCHA_SECRET, response: token }),
+      signal: AbortSignal.timeout(10000),
+      cache: "no-store",
+    });
+    if (!res.ok) return false;
+    const data = (await res.json()) as {
+      success?: boolean;
+      "error-codes"?: string[];
+    };
+    if (!data.success) {
+      console.warn("[contact] captcha rejected:", data["error-codes"]);
+    }
+    return data.success === true;
+  } catch (error) {
+    // Fail closed. A verification outage must not become an open relay.
+    console.error("[contact] captcha verification failed:", error);
+    return false;
+  }
+}
 const services = new Set([
   ...SERVICE_CATEGORIES.flatMap((category) => category.services.map((service) => service.title)),
   "Not sure yet",
@@ -25,6 +67,21 @@ export async function POST(request: Request) {
   const service = read("service");
   const property = read("propertyType");
   const message = read("message");
+
+  if (HCAPTCHA_SITE_KEY) {
+    // The widget is live for visitors, so a token is required. Missing secret
+    // is a deploy mistake, not a visitor problem — refuse rather than wave
+    // everything through while the form appears to be protected.
+    if (!HCAPTCHA_SECRET) {
+      console.error(
+        "[contact] NEXT_PUBLIC_HCAPTCHA_SITE_KEY is set but HCAPTCHA_SECRET_KEY is missing; refusing submissions.",
+      );
+      return Response.json({ success: false }, { status: 500 });
+    }
+    if (!(await captchaAccepted(read("hcaptchaToken")))) {
+      return Response.json({ success: false }, { status: 400 });
+    }
+  }
 
   if (
     read("website") || !name || name.length > 200 ||
