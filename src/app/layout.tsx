@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { SITE_URL } from "@/config/site";
+import { consentDefaultScript } from "@/lib/consent";
+import { CookieBanner } from "@/components/sections/CookieBanner";
 import "./globals.css";
 
 /**
@@ -49,6 +52,19 @@ export default function RootLayout({
       lang="en"
       className="h-full antialiased"
     >
+      {/*
+        Consent Mode defaults, denied until the visitor says otherwise.
+
+        ORDER IS LOAD-BEARING: this must execute before `gtm.js`, or tags can
+        fire once in a consented state before the default arrives.
+        `beforeInteractive` puts it in the initial HTML ahead of any Next
+        module, which a React effect could never do — effects run after
+        hydration, long after the container has started.
+      */}
+      <Script id="consent-mode-default" strategy="beforeInteractive">
+        {consentDefaultScript()}
+      </Script>
+
       {/* Loads after hydration, so the container never blocks first paint. */}
       <GoogleTagManager gtmId={GTM_CONTAINER_ID} />
       <body className="min-h-full">
@@ -67,6 +83,7 @@ export default function RootLayout({
           />
         </noscript>
         {children}
+        <CookieBanner />
       </body>
     </html>
   );

@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Container } from "@/components/ui/Container";
 import { PreferredSourceButton } from "@/components/sections/PreferredSourceButton";
+import { CookieSettingsButton } from "@/components/ui/CookieSettingsButton";
 import { NAV_DEFAULTS } from "@/content/pages";
 import type { SiteSettings, NavigationContent } from "@/sanity/lib/types";
 
@@ -109,9 +110,14 @@ export function Footer({
           </div>
         </div>
 
-        <p className="pb-10 text-center text-sm text-n-500">
-          © {new Date().getFullYear()} {title}. All rights reserved.
-        </p>
+        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 pb-10 text-center text-sm text-n-500">
+          <span>
+            © {new Date().getFullYear()} {title}. All rights reserved.
+          </span>
+          <span aria-hidden>·</span>
+          {/* Consent has to be as easy to withdraw as it was to give. */}
+          <CookieSettingsButton />
+        </div>
       </Container>
     </footer>
   );
