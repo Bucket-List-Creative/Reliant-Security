@@ -16,6 +16,16 @@ import "./globals.css";
  * Hardcoded rather than an env var: a container ID is public (it ships in the
  * page source on every request) and must be identical across environments for
  * GTM's own environment and hostname rules to work.
+ *
+ * ── SPA PAGEVIEWS ARE A GTM-SIDE CONCERN ──────────────────────────────────
+ *
+ * This component only injects the container; it does not watch the router.
+ * App Router navigations are `pushState`, so they fire no page load, and
+ * without a **History Change** trigger inside the GTM container a session
+ * records only its landing page — every later page is invisible. Configure
+ * the pageview tag in GTM to fire on History Change (or enable GA4's
+ * "page changes based on browser history events"), not here: pushing
+ * pageviews from the app as well would double-count every navigation.
  */
 const GTM_CONTAINER_ID = "GTM-P58JD797";
 
